@@ -37,20 +37,13 @@
     .logout-btn { background: #ef4444; margin-top: 20px; }
     .logout-btn:hover { background: #dc2626; }
 
-    /* Property Browser Elements */
-    .filter-row { display: flex; gap: 10px; margin-bottom: 20px; }
-    .property-grid { display: flex; flex-direction: column; gap: 15px; margin-top: 15px; }
-    .property-item { border: 1px solid #eee; border-radius: 12px; overflow: hidden; background: #fff; transition: transform 0.2s; }
-    .property-item:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-    .property-img-placeholder { height: 140px; background: #e2e8f0; display: flex; align-items: center; justify-content: center; color: #64748b; font-weight: bold; font-size: 0.9rem; position: relative; }
-    .property-price-tag { position: absolute; bottom: 10px; left: 10px; background: #1e3a8a; color: white; padding: 4px 10px; border-radius: 6px; font-weight: bold; font-size: 0.9rem; }
-    .property-info { padding: 15px; }
-    .property-address { font-weight: bold; font-size: 1.1rem; color: #1e3a8a; margin-bottom: 4px; }
-    .property-specs { font-size: 0.85rem; color: #666; margin-bottom: 10px; }
+    /* Property Browser Iframe Wrapper */
+    .search-container-card { background: white; padding: 20px 15px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); width: 100%; max-width: 440px; border: 1px solid #eaeaea; margin-bottom: 20px; }
+    .iframe-wrapper { width: 100%; height: 580px; border-radius: 12px; overflow: hidden; border: 1px solid #e5e7eb; background: #fff; }
     
     /* Bottom Navigation Bar Layout */
     .nav-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 440px; height: 70px; background: white; border-top: 1px solid #e5e7eb; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -4px 15px rgba(0,0,0,0.04); border-radius: 16px 16px 0 0; z-index: 999; }
-    .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #9ca3af; cursor: pointer; font-size: 0.75rem; font-weight: 600; width: 33%; height: 100%; transition: color 0.2s; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #9ca3af; cursor: pointer; font-size: 0.75rem; font-weight: 600; width: 50%; height: 100%; transition: color 0.2s; }
     .nav-item.active { color: #1e3a8a; }
     .nav-icon { font-size: 1.4rem; margin-bottom: 2px; }
   </style>
@@ -111,25 +104,14 @@
       <button class="logout-btn" onclick="handleLogout()">Log Out</button>
     </div>
 
-    <!-- TAB 2: PROPERTY SEARCH EXPERIENCES -->
-    <div id="tabSearch" class="card hidden">
-      <div class="brand">Find Properties</div>
-      <div class="subtitle">Search available inventory and local market listings</div>
+    <!-- TAB 2: LIVE BEACHESMLS PROPERTY SEARCH -->
+    <div id="tabSearch" class="search-container-card hidden">
+      <div class="brand">Browse Homes</div>
+      <div class="subtitle" style="margin-bottom: 15px;">Live inventory via BeachesMLS</div>
 
-      <!-- Filters Row -->
-      <div class="filter-row">
-        <input type="text" id="searchCity" placeholder="City or ZIP..." onkeyup="filterProperties()">
-        <select id="priceFilter" onchange="filterProperties()">
-          <option value="all">Max Price</option>
-          <option value="400000">$400k</option>
-          <option value="600000">$600k</option>
-          <option value="800000">$800k</option>
-        </select>
-      </div>
-
-      <!-- Live-Filtering Property List Context -->
-      <div class="property-grid" id="listingsContainer">
-        <!-- Rendered dynamically by javascript framework -->
+      <!-- Integrated Live Matrix Search Tool -->
+      <div class="iframe-wrapper">
+        <iframe src="https://matrix.beachesmls.com/Matrix/public/IDX.aspx?idx=bd87e7" width="100%" height="100%" frameborder="0" marginwidth="0" marginheight="0"></iframe>
       </div>
     </div>
 
@@ -157,13 +139,6 @@
     let isSignUpMode = true;
     let currentUser = null;
 
-    // Standard Real Estate Mock Inventory Array
-    const propertiesData = [
-      { id: 1, address: "742 Evergreen Terrace", city: "Pembroke Pines", price: 385000, specs: "3 Bed • 2 Bath • 1,850 SqFt" },
-      { id: 2, address: "1104 Ocean View Drive", city: "Fort Lauderdale", price: 595000, specs: "4 Bed • 3.5 Bath • 2,900 SqFt" },
-      { id: 3, address: "4401 Pinecrest Way", city: "Pembroke Pines", price: 720000, specs: "5 Bed • 4 Bath • 3,400 SqFt" }
-    ];
-
     // Monitor login session state changes live
     supabaseClient.auth.onAuthStateChange((event, session) => {
       if (session) {
@@ -186,48 +161,7 @@
         document.getElementById('tabSearch').classList.remove('hidden');
         document.getElementById('navWallet').classList.remove('active');
         document.getElementById('navSearch').classList.add('active');
-        renderProperties(propertiesData);
       }
-    }
-
-    function renderProperties(items) {
-      const container = document.getElementById('listingsContainer');
-      container.innerHTML = "";
-      
-      if(items.length === 0) {
-        container.innerHTML = `<p style="font-size:0.9rem; color:#888; text-align:center; padding:20px;">No matches found matching criteria.</p>`;
-        return;
-      }
-
-      items.forEach(prop => {
-        container.innerHTML += `
-          <div class="property-item">
-            <div class="property-img-placeholder">
-              🏠 View Listing Photo
-              <div class="property-price-tag">$${prop.price.toLocaleString()}</div>
-            </div>
-            <div class="property-info">
-              <div class="property-address">${prop.address}</div>
-              <div class="property-specs">${prop.specs}</div>
-              <p style="font-size:0.8rem; color:#888; font-style:italic;">${prop.city}, FL</p>
-              <button style="padding: 8px; font-size: 0.85rem; margin-top: 8px; background: #374151;" onclick="alert('Property saved!')">Save to Favorites</button>
-            </div>
-          </div>
-        `;
-      });
-    }
-
-    function filterProperties() {
-      const text = document.getElementById('searchCity').value.toLowerCase();
-      const maxPrice = document.getElementById('priceFilter').value;
-
-      const filtered = propertiesData.filter(prop => {
-        const matchesText = prop.city.toLowerCase().includes(text) || prop.address.toLowerCase().includes(text);
-        const matchesPrice = maxPrice === "all" || prop.price <= parseInt(maxPrice);
-        return matchesText && matchesPrice;
-      });
-
-      renderProperties(filtered);
     }
 
     function toggleAuthMode() {
