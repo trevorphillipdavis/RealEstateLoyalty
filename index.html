@@ -50,7 +50,7 @@
     
     .referral-item { background: #fafafa; padding: 15px; border-radius: 8px; border: 1px solid #e5e7eb; margin-top: 10px; display: flex; flex-direction: column; gap: 6px; text-align: left; }
     .referral-header { font-weight: bold; color: #1e3a8a; display: flex; justify-content: space-between; align-items: center; }
-    .client-info-box { background: #f0f4ff; border-left: 3px solid #1e3a8a; padding: 8px 10px; border-radius: 4px; font-size: 0.78rem; color: #334155; margin: 4px 0; }
+    .client-info-box { background: #f0f4ff; border-left: 3px solid #1e3a8a; padding: 8px 10px; border-radius: 4px; font-size: 0.78rem; color: #334155; margin: 4px 0; line-height: 1.4; }
     
     .action-btn-row { display: flex; gap: 8px; margin-top: 5px; }
     .btn-accept { background: #2563eb; padding: 8px 12px; font-size: 0.8rem; margin-top: 5px; }
@@ -105,7 +105,7 @@
       <h3>Submit a New Referral</h3>
       <p style="font-size: 0.8rem; color: #666; margin-bottom: 15px;">Earn points when your referral closes a transaction!</p>
       
-      <!-- Split Name Form Inputs -->
+      <!-- Four-Field Referral Submission Form -->
       <div class="form-row">
         <div class="form-group">
           <label for="refFirstName">First Name</label>
@@ -143,7 +143,7 @@
       </div>
     </div>
 
-    <!-- TAB 3: AGENT DASHBOARD PORTAL WITH DETAILED CLIENT CONTACT DATA -->
+    <!-- TAB 3: AGENT DASHBOARD PORTAL -->
     <div id="tabAdmin" class="card hidden">
       <div class="brand" style="color: #bc1a1a;">Agent Dashboard</div>
       <div class="subtitle" style="margin-bottom:10px;">Pipeline Management</div>
@@ -305,13 +305,12 @@
       }
     }
 
-    // UPDATED PIPELINE QUEUE: Joins the Referrer's profile data
+    // UPDATED PIPELINE QUEUE: Graceful query with fallback error handling
     async function loadPendingReferrals() {
       const queueContainer = document.getElementById('adminReferralsQueue');
       queueContainer.innerHTML = `<p style="font-size:0.8rem; color:#888; margin-top:15px; text-align:center;">Loading ${currentFilter} records...</p>`;
 
-      // Perform a relational query joining referrals with client profiles
-      const { data: referrals, error } = await supabaseClient
+      let { data: referrals, error } = await supabaseClient
         .from('referrals')
         .select(`
           *,
@@ -322,6 +321,17 @@
           )
         `)
         .eq('status', currentFilter);
+
+      // Fallback query if relational join fails
+      if (error) {
+        console.warn("Relational query failed, falling back to direct referrals query:", error.message);
+        const fallback = await supabaseClient
+          .from('referrals')
+          .select('*')
+          .eq('status', currentFilter);
+        referrals = fallback.data;
+        error = fallback.error;
+      }
 
       if (error || !referrals || referrals.length === 0) {
         queueContainer.innerHTML = `<p style="font-size:0.85rem; color:#6b7280; margin-top:20px; text-align:center;">No ${currentFilter} referrals found.</p>`;
@@ -342,8 +352,8 @@
         }
 
         const refFullName = `${ref.ref_first_name || ''} ${ref.ref_last_name || ''}`.trim() || 'Unspecified Lead';
-        const clientEmail = ref.clients?.email || 'N/A';
-        const clientName = ref.clients?.full_name || 'Registered User';
+        const clientEmail = ref.clients?.email || ref.referrer_client_id || 'N/A';
+        const clientName = ref.clients?.full_name || 'Registered Customer';
         const clientPhone = ref.clients?.phone || 'No phone recorded';
 
         queueContainer.innerHTML += `
@@ -355,14 +365,13 @@
               </span>
             </div>
             
-            <div style="font-size:0.82rem; color:#475569; margin-top: 2px;">
+            <div style="font-size:0.82rem; color:#475569; margin-top: 4px;">
               <strong>Lead Email:</strong> ${ref.ref_email || 'N/A'}<br>
               <strong>Lead Phone:</strong> ${ref.ref_phone || 'N/A'}
             </div>
 
-            <!-- Referring Client Details Box -->
             <div class="client-info-box">
-              <strong>Submitted By Customer:</strong><br>
+              <strong>Referred By Customer:</strong><br>
               👤 ${clientName}<br>
               ✉️ ${clientEmail}<br>
               📞 ${clientPhone}
@@ -433,7 +442,7 @@
       document.getElementById('authContainer').classList.remove('hidden');
     }
 
-    // UPDATED REFERRAL SUBMISSION LOGIC (Saves First Name, Last Name, Email, and Phone)
+    // SUBMISSION HANDLER: Captures First Name, Last Name, Email, and Phone
     async function submitReferral() {
       const firstName = document.getElementById('refFirstName').value;
       const lastName = document.getElementById('refLastName').value;
