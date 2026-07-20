@@ -136,12 +136,28 @@
       msgDiv.innerText = "Processing...";
 
       if (isSignUpMode) {
-        const { error } = await supabaseClient.auth.signUp({ email, password });
-        if (error) { msgDiv.style.color = '#ef4444'; msgDiv.innerText = error.message; }
-        else { msgDiv.style.color = '#10b981'; msgDiv.innerText = "Account initiated! Verify via your email inbox link."; }
+        // FIXED: Included explicit options path mapping to prevent the verification redirect loophole
+        const { error } = await supabaseClient.auth.signUp({ 
+          email, 
+          password,
+          options: {
+            emailRedirectTo: window.location.origin + window.location.pathname
+          }
+        });
+        
+        if (error) { 
+          msgDiv.style.color = '#ef4444'; 
+          msgDiv.innerText = error.message; 
+        } else { 
+          msgDiv.style.color = '#10b981'; 
+          msgDiv.innerText = "Account initiated! Please check your inbox for a verification email link."; 
+        }
       } else {
         const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
-        if (error) { msgDiv.style.color = '#ef4444'; msgDiv.innerText = error.message; }
+        if (error) { 
+          msgDiv.style.color = '#ef4444'; 
+          msgDiv.innerText = error.message; 
+        }
       }
     }
 
