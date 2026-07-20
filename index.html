@@ -31,9 +31,6 @@
     .points-display { background: #f0f4ff; border: 2px dashed #1e3a8a; padding: 20px; border-radius: 12px; margin: 20px 0; text-align: center; }
     .points-num { font-size: 3rem; font-weight: 900; color: #1e3a8a; }
     .tier-badge { display: inline-block; padding: 6px 14px; background: #e5e7eb; border-radius: 50px; font-weight: bold; font-size: 0.85rem; margin-top: 5px; text-transform: uppercase; }
-    .tier-Bronze { background: #cd7f32; color: white; }
-    .tier-Silver { background: #c0c0c0; color: #333; }
-    .tier-Gold { background: #ffd700; color: #333; }
     
     .divider { margin: 25px 0; border-bottom: 1px solid #eee; }
     .logout-btn { background: #ef4444; margin-top: 20px; }
@@ -65,7 +62,7 @@
 </head>
 <body>
 
-  <!-- AUTH CONTAINER -->
+  <!-- PUBLIC AUTH / SIGNUP CONTAINER -->
   <div id="authContainer" class="card">
     <div class="brand">Brokerage Rewards</div>
     <div id="authSubtitle" class="subtitle">Create your account to start earning points</div>
@@ -76,7 +73,7 @@
     </div>
     
     <div class="form-group">
-      <label for="password">Password</label>
+      <label for="password">Password (Set your password)</label>
       <input type="password" id="password" placeholder="••••••••">
     </div>
     
@@ -85,10 +82,10 @@
     <div class="msg" id="statusMessage"></div>
   </div>
 
-  <!-- MAIN INTERFACE -->
+  <!-- MAIN APP INTERFACE -->
   <div id="appInterface" class="hidden" style="width: 100%; max-width: 440px;">
     
-    <!-- TAB 1: CLIENT WALLET -->
+    <!-- TAB 1: CLIENT REWARDS WALLET -->
     <div id="tabWallet" class="card">
       <div class="brand">Welcome Back!</div>
       <div class="subtitle" id="clientNameHeader">Loading profile...</div>
@@ -132,7 +129,7 @@
       <button class="logout-btn" onclick="handleLogout()">Log Out</button>
     </div>
 
-    <!-- TAB 2: BEACHESMLS MAP SEARCH -->
+    <!-- TAB 2: BEACHESMLS SEARCH MAP -->
     <div id="tabSearch" class="search-container-card hidden">
       <div class="brand">Browse Homes</div>
       <div class="subtitle" style="margin-bottom: 15px;">Live map search via BeachesMLS</div>
@@ -157,11 +154,33 @@
       <div id="agentQueue"></div>
     </div>
 
-    <!-- TAB 4: BROKER APPROVAL PORTAL -->
+    <!-- TAB 4: BROKER PORTAL (Includes Agent Creation Form + Point Approvals) -->
     <div id="tabBroker" class="card hidden">
-      <div class="brand" style="color: #bc1a1a;">Broker Approval</div>
-      <div class="subtitle" style="margin-bottom:10px;">Review Point Award Requests</div>
+      <div class="brand" style="color: #bc1a1a;">Brokerage Management</div>
+      <div class="subtitle" style="margin-bottom:15px;">Broker Administrative Control</div>
+
+      <!-- Form for Brokers to Add New Agents -->
+      <div style="background: #fff5f5; border: 1px solid #fed7d7; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+        <h4 style="color: #9b2c2c; margin-bottom: 8px;">➕ Register New Agent</h4>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="newAgentFirst">First Name</label>
+            <input type="text" id="newAgentFirst" placeholder="Jane">
+          </div>
+          <div class="form-group">
+            <label for="newAgentLast">Last Name</label>
+            <input type="text" id="newAgentLast" placeholder="Agent">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="newAgentEmail">Agent Email</label>
+          <input type="email" id="newAgentEmail" placeholder="agent@email.com">
+        </div>
+        <button style="background: #9b2c2c;" onclick="createAgentByBroker()">Provision Agent Account</button>
+        <div class="msg" id="agentInviteMsg"></div>
+      </div>
       
+      <p style="font-size:0.85rem; font-weight:bold; color:#374151; margin-bottom: 8px;">Pending Point Disburse Approvals:</p>
       <div id="brokerQueue"></div>
     </div>
 
@@ -268,9 +287,16 @@
       msgDiv.innerText = "Processing...";
 
       if (isSignUpMode) {
-        const { error } = await supabaseClient.auth.signUp({ email, password });
-        if (error) { msgDiv.style.color = '#ef4444'; msgDiv.innerText = error.message; }
-        else { msgDiv.style.color = '#10b981'; msgDiv.innerText = "Check your email for confirmation!"; }
+        // Sign up user with the password they set
+        const { data, error } = await supabaseClient.auth.signUp({ email, password });
+        
+        if (error) { 
+          msgDiv.style.color = '#ef4444'; 
+          msgDiv.innerText = error.message; 
+        } else {
+          msgDiv.style.color = '#10b981'; 
+          msgDiv.innerText = "Account created! Check your email to verify, then log in."; 
+        }
       } else {
         const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
         if (error) { msgDiv.style.color = '#ef4444'; msgDiv.innerText = error.message; }
@@ -291,7 +317,7 @@
 
       userRole = profile?.role || 'client';
 
-      // Dynamically display tabs based on 3-tier hierarchy
+      // Show/Hide Portal tabs based on role
       if (userRole === 'agent') {
         document.getElementById('navAgent').classList.remove('hidden');
         document.getElementById('navBroker').classList.add('hidden');
@@ -299,7 +325,7 @@
         document.getElementById('navAgent').classList.remove('hidden');
         document.getElementById('navBroker').classList.remove('hidden');
       } else {
-        // Standard Clients do NOT see any Agent or Broker portal tabs
+        // Clients do NOT see Agent or Broker tabs
         document.getElementById('navAgent').classList.add('hidden');
         document.getElementById('navBroker').classList.add('hidden');
       }
@@ -312,7 +338,43 @@
       }
     }
 
-    // AGENT VIEW QUEUE
+    // BROKER ACTION: Provision a New Agent
+    async function createAgentByBroker() {
+      const first = document.getElementById('newAgentFirst').value;
+      const last = document.getElementById('newAgentLast').value;
+      const email = document.getElementById('newAgentEmail').value;
+      const msg = document.getElementById('agentInviteMsg');
+
+      if (!first || !email) {
+        msg.style.color = '#ef4444';
+        msg.innerText = "First Name and Email are required.";
+        return;
+      }
+
+      msg.innerText = "Provisioning Agent...";
+
+      // Insert pre-provisioned agent record into database
+      const { error } = await supabaseClient.from('clients').insert([
+        { 
+          email: email.toLowerCase(), 
+          full_name: `${first} ${last}`.trim(), 
+          role: 'agent' 
+        }
+      ]);
+
+      if (error) {
+        msg.style.color = '#ef4444';
+        msg.innerText = "Error creating agent: " + error.message;
+      } else {
+        msg.style.color = '#10b981';
+        msg.innerText = `Agent ${first} ${last} provisioned! They can now log in using ${email} and set their password.`;
+        document.getElementById('newAgentFirst').value = "";
+        document.getElementById('newAgentLast').value = "";
+        document.getElementById('newAgentEmail').value = "";
+      }
+    }
+
+    // AGENT QUEUE
     async function loadAgentQueue() {
       const container = document.getElementById('agentQueue');
       container.innerHTML = `<p style="font-size:0.8rem; color:#888; margin-top:15px; text-align:center;">Loading records...</p>`;
@@ -339,7 +401,7 @@
               </span>
             </div>
             <div style="font-size:0.8rem; color:#475569;">
-              Lead Email: ${ref.ref_email || 'N/A'} | Phone: ${ref.ref_phone || 'N/A'}
+              Email: ${ref.ref_email || 'N/A'} | Phone: ${ref.ref_phone || 'N/A'}
             </div>
             <div class="client-info-box">
               <strong>Submitted By Customer:</strong> ${ref.clients?.email || ref.referrer_client_id}
@@ -355,7 +417,7 @@
       });
     }
 
-    // BROKER VIEW QUEUE
+    // BROKER QUEUE
     async function loadBrokerQueue() {
       const container = document.getElementById('brokerQueue');
       container.innerHTML = `<p style="font-size:0.8rem; color:#888; margin-top:15px; text-align:center;">Checking pending approvals...</p>`;
@@ -366,7 +428,7 @@
         .eq('status', 'pending_broker_approval');
 
       if (!referrals || referrals.length === 0) {
-        container.innerHTML = `<p style="font-size:0.85rem; color:#10b981; font-weight:bold; margin-top:20px; text-align:center;">✅ All caught up! No pending point approvals.</p>`;
+        container.innerHTML = `<p style="font-size:0.85rem; color:#10b981; font-weight:bold; margin-top:20px; text-align:center;">✅ No pending point approvals.</p>`;
         return;
       }
 
@@ -388,7 +450,6 @@
       });
     }
 
-    // WORKFLOW ACTIONS
     async function agentAcceptLead(id) {
       await supabaseClient.from('referrals').update({ status: 'accepted' }).eq('id', id);
       alert("Lead accepted into active pipeline!");
@@ -402,15 +463,12 @@
     }
 
     async function brokerApproveAndAward(referralId, clientUuid) {
-      // 1. Fetch Client Profile
       const { data: profile } = await supabaseClient.from('clients').select('total_points').eq('id', clientUuid).single();
       const newPointsTotal = (profile?.total_points || 0) + 500;
 
-      // 2. Award Points & Close Referral
       await supabaseClient.from('clients').update({ total_points: newPointsTotal }).eq('id', clientUuid);
       await supabaseClient.from('referrals').update({ status: 'closed' }).eq('id', referralId);
 
-      // 3. Log History
       await supabaseClient.from('points_ledger').insert([
         { client_id: clientUuid, amount: 500, action_type: 'referral_bonus', description: 'Broker approved referral closing points' }
       ]);
@@ -458,6 +516,10 @@
 
     async function handleLogout() {
       await supabaseClient.auth.signOut();
+    }
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js'); });
     }
   </script>
 </body>
