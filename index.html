@@ -9,8 +9,8 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #fafafa; color: #333; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-    .card { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); width: 100%; max-width: 440px; border: 1px solid #eaeaea; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #fafafa; color: #333; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; padding-bottom: 90px; }
+    .card { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); width: 100%; max-width: 440px; border: 1px solid #eaeaea; margin-bottom: 20px; }
     .brand { font-size: 1.6rem; font-weight: bold; color: #1e3a8a; margin-bottom: 5px; text-align: center; }
     .subtitle { font-size: 0.9rem; color: #666; margin-bottom: 25px; text-align: center; }
     .hidden { display: none !important; }
@@ -18,8 +18,8 @@
     /* Form Styles */
     .form-group { text-align: left; margin-bottom: 15px; }
     label { display: block; font-size: 0.85rem; font-weight: 600; color: #444; margin-bottom: 6px; }
-    input, textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; outline: none; font-family: inherit; }
-    input:focus, textarea:focus { border-color: #1e3a8a; }
+    input, textarea, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; outline: none; font-family: inherit; background: white; }
+    input:focus, textarea:focus, select:focus { border-color: #1e3a8a; }
     button { width: 100%; padding: 14px; background: #1e3a8a; color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-top: 10px; transition: background 0.2s; }
     button:hover { background: #111827; }
     .msg { margin-top: 15px; font-size: 0.9rem; font-weight: 500; text-align: center; }
@@ -36,6 +36,23 @@
     .divider { margin: 25px 0; border-bottom: 1px solid #eee; }
     .logout-btn { background: #ef4444; margin-top: 20px; }
     .logout-btn:hover { background: #dc2626; }
+
+    /* Property Browser Elements */
+    .filter-row { display: flex; gap: 10px; margin-bottom: 20px; }
+    .property-grid { display: flex; flex-direction: column; gap: 15px; margin-top: 15px; }
+    .property-item { border: 1px solid #eee; border-radius: 12px; overflow: hidden; background: #fff; transition: transform 0.2s; }
+    .property-item:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .property-img-placeholder { height: 140px; background: #e2e8f0; display: flex; align-items: center; justify-content: center; color: #64748b; font-weight: bold; font-size: 0.9rem; position: relative; }
+    .property-price-tag { position: absolute; bottom: 10px; left: 10px; background: #1e3a8a; color: white; padding: 4px 10px; border-radius: 6px; font-weight: bold; font-size: 0.9rem; }
+    .property-info { padding: 15px; }
+    .property-address { font-weight: bold; font-size: 1.1rem; color: #1e3a8a; margin-bottom: 4px; }
+    .property-specs { font-size: 0.85rem; color: #666; margin-bottom: 10px; }
+    
+    /* Bottom Navigation Bar Layout */
+    .nav-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 440px; height: 70px; background: white; border-top: 1px solid #e5e7eb; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -4px 15px rgba(0,0,0,0.04); border-radius: 16px 16px 0 0; z-index: 999; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #9ca3af; cursor: pointer; font-size: 0.75rem; font-weight: 600; width: 33%; height: 100%; transition: color 0.2s; }
+    .nav-item.active { color: #1e3a8a; }
+    .nav-icon { font-size: 1.4rem; margin-bottom: 2px; }
   </style>
 </head>
 <body>
@@ -60,41 +77,78 @@
     <div class="msg" id="statusMessage"></div>
   </div>
 
-  <!-- ================= DASHBOARD CONTAINER ================= -->
-  <div id="dashboardContainer" class="card hidden">
-    <div class="brand">Welcome Back!</div>
-    <div class="subtitle" id="clientNameHeader">Loading your profile...</div>
-
-    <!-- Tier & Points Tracking Display -->
-    <div class="points-display">
-      <p style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; color: #555;">Current Balance</p>
-      <div class="points-num" id="pointsVal">0</div>
-      <p style="font-size: 0.8rem; color: #666; margin-bottom: 5px;">1 Point = $1 Value</p>
-      <span id="tierBadge" class="tier-badge tier-Bronze">Bronze Member</span>
-    </div>
-
-    <div class="divider"></div>
-
-    <!-- Referral Submission Form Component -->
-    <h3>Submit a New Referral</h3>
-    <p style="font-size: 0.8rem; color: #666; margin-bottom: 15px;">Earn points when your referral closes a transaction!</p>
+  <!-- ================= MAIN PWA INTERFACE ================= -->
+  <div id="appInterface" class="hidden" style="width: 100%; max-width: 440px;">
     
-    <div class="form-group">
-      <label for="refName">Friend's Full Name</label>
-      <input type="text" id="refName" placeholder="Jane Doe">
-    </div>
-    <div class="form-group">
-      <label for="refContact">Friend's Phone or Email</label>
-      <input type="text" id="refContact" placeholder="jane@example.com">
-    </div>
-    <button onclick="submitReferral()">Submit Referral</button>
-    <div class="msg" id="refStatusMessage"></div>
+    <!-- TAB 1: REWARDS & WALLET SECTION -->
+    <div id="tabWallet" class="card">
+      <div class="brand">Welcome Back!</div>
+      <div class="subtitle" id="clientNameHeader">Loading your profile...</div>
 
-    <button class="logout-btn" onclick="handleLogout()">Log Out</button>
+      <div class="points-display">
+        <p style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; color: #555;">Current Balance</p>
+        <div class="points-num" id="pointsVal">0</div>
+        <p style="font-size: 0.8rem; color: #666; margin-bottom: 5px;">1 Point = $1 Value</p>
+        <span id="tierBadge" class="tier-badge tier-Bronze">Bronze Member</span>
+      </div>
+
+      <div class="divider"></div>
+
+      <h3>Submit a New Referral</h3>
+      <p style="font-size: 0.8rem; color: #666; margin-bottom: 15px;">Earn points when your referral closes a transaction!</p>
+      
+      <div class="form-group">
+        <label for="refName">Friend's Full Name</label>
+        <input type="text" id="refName" placeholder="Jane Doe">
+      </div>
+      <div class="form-group">
+        <label for="refContact">Friend's Phone or Email</label>
+        <input type="text" id="refContact" placeholder="jane@example.com">
+      </div>
+      <button onclick="submitReferral()">Submit Referral</button>
+      <div class="msg" id="refStatusMessage"></div>
+
+      <button class="logout-btn" onclick="handleLogout()">Log Out</button>
+    </div>
+
+    <!-- TAB 2: PROPERTY SEARCH EXPERIENCES -->
+    <div id="tabSearch" class="card hidden">
+      <div class="brand">Find Properties</div>
+      <div class="subtitle">Search available inventory and local market listings</div>
+
+      <!-- Filters Row -->
+      <div class="filter-row">
+        <input type="text" id="searchCity" placeholder="City or ZIP..." onkeyup="filterProperties()">
+        <select id="priceFilter" onchange="filterProperties()">
+          <option value="all">Max Price</option>
+          <option value="400000">$400k</option>
+          <option value="600000">$600k</option>
+          <option value="800000">$800k</option>
+        </select>
+      </div>
+
+      <!-- Live-Filtering Property List Context -->
+      <div class="property-grid" id="listingsContainer">
+        <!-- Rendered dynamically by javascript framework -->
+      </div>
+    </div>
+
+    <!-- FIXED STICKY NAVIGATION BAR -->
+    <nav class="nav-bar">
+      <div class="nav-item active" id="navWallet" onclick="switchTab('wallet')">
+        <span class="nav-icon">💎</span>
+        <span>My Rewards</span>
+      </div>
+      <div class="nav-item" id="navSearch" onclick="switchTab('search')">
+        <span class="nav-icon">🏠</span>
+        <span>Browse Homes</span>
+      </div>
+    </nav>
+
   </div>
 
   <script>
-    // ===== AUTOMATICALLY INJECTED SUPABASE CREDENTIALS =====
+    // ===== LIVE LINKED SUPABASE ENGINE =====
     const SUPABASE_URL = "https://pgudhthdmlcokwniuial.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBndWRodGhkbWxjb2t3bml1aWFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ1NTMxMTgsImV4cCI6MjEwMDEyOTExOH0.hZM89R6iIjBs6IVXDGRD0AwP4gF8ztdpxp73_x9sgyU";
     
@@ -102,6 +156,13 @@
 
     let isSignUpMode = true;
     let currentUser = null;
+
+    // Standard Real Estate Mock Inventory Array
+    const propertiesData = [
+      { id: 1, address: "742 Evergreen Terrace", city: "Pembroke Pines", price: 385000, specs: "3 Bed • 2 Bath • 1,850 SqFt" },
+      { id: 2, address: "1104 Ocean View Drive", city: "Fort Lauderdale", price: 595000, specs: "4 Bed • 3.5 Bath • 2,900 SqFt" },
+      { id: 3, address: "4401 Pinecrest Way", city: "Pembroke Pines", price: 720000, specs: "5 Bed • 4 Bath • 3,400 SqFt" }
+    ];
 
     // Monitor login session state changes live
     supabaseClient.auth.onAuthStateChange((event, session) => {
@@ -113,6 +174,61 @@
         showAuth();
       }
     });
+
+    function switchTab(targetTab) {
+      if(targetTab === 'wallet') {
+        document.getElementById('tabWallet').classList.remove('hidden');
+        document.getElementById('tabSearch').classList.add('hidden');
+        document.getElementById('navWallet').classList.add('active');
+        document.getElementById('navSearch').classList.remove('active');
+      } else {
+        document.getElementById('tabWallet').classList.add('hidden');
+        document.getElementById('tabSearch').classList.remove('hidden');
+        document.getElementById('navWallet').classList.remove('active');
+        document.getElementById('navSearch').classList.add('active');
+        renderProperties(propertiesData);
+      }
+    }
+
+    function renderProperties(items) {
+      const container = document.getElementById('listingsContainer');
+      container.innerHTML = "";
+      
+      if(items.length === 0) {
+        container.innerHTML = `<p style="font-size:0.9rem; color:#888; text-align:center; padding:20px;">No matches found matching criteria.</p>`;
+        return;
+      }
+
+      items.forEach(prop => {
+        container.innerHTML += `
+          <div class="property-item">
+            <div class="property-img-placeholder">
+              🏠 View Listing Photo
+              <div class="property-price-tag">$${prop.price.toLocaleString()}</div>
+            </div>
+            <div class="property-info">
+              <div class="property-address">${prop.address}</div>
+              <div class="property-specs">${prop.specs}</div>
+              <p style="font-size:0.8rem; color:#888; font-style:italic;">${prop.city}, FL</p>
+              <button style="padding: 8px; font-size: 0.85rem; margin-top: 8px; background: #374151;" onclick="alert('Property saved!')">Save to Favorites</button>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function filterProperties() {
+      const text = document.getElementById('searchCity').value.toLowerCase();
+      const maxPrice = document.getElementById('priceFilter').value;
+
+      const filtered = propertiesData.filter(prop => {
+        const matchesText = prop.city.toLowerCase().includes(text) || prop.address.toLowerCase().includes(text);
+        const matchesPrice = maxPrice === "all" || prop.price <= parseInt(maxPrice);
+        return matchesText && matchesPrice;
+      });
+
+      renderProperties(filtered);
+    }
 
     function toggleAuthMode() {
       isSignUpMode = !isSignUpMode;
@@ -140,9 +256,7 @@
         const { error } = await supabaseClient.auth.signUp({ 
           email, 
           password,
-          options: {
-            emailRedirectTo: window.location.origin + window.location.pathname
-          }
+          options: { emailRedirectTo: window.location.origin + window.location.pathname }
         });
         
         if (error) { 
@@ -163,10 +277,9 @@
 
     async function showDashboard() {
       document.getElementById('authContainer').classList.add('hidden');
-      document.getElementById('dashboardContainer').classList.remove('hidden');
+      document.getElementById('appInterface').classList.remove('hidden');
       document.getElementById('clientNameHeader').innerText = currentUser.email;
 
-      // Realtime Client Profile Syncing Fetch
       const { data: clientProfile } = await supabaseClient
         .from('clients')
         .select('total_points, current_tier')
@@ -182,7 +295,7 @@
     }
 
     function showAuth() {
-      document.getElementById('dashboardContainer').classList.add('hidden');
+      document.getElementById('appInterface').classList.add('hidden');
       document.getElementById('authContainer').classList.remove('hidden');
     }
 
@@ -201,11 +314,7 @@
       refMsg.innerText = "Submitting referral...";
 
       const { error } = await supabaseClient.from('referrals').insert([
-        { 
-          referrer_client_id: currentUser.id, 
-          ref_first_name: name, 
-          ref_email: contact 
-        }
+        { referrer_client_id: currentUser.id, ref_first_name: name, ref_email: contact }
       ]);
 
       if(error) {
@@ -224,7 +333,6 @@
       await supabaseClient.auth.signOut();
     }
 
-    // Register PWA service engine
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js'); });
     }
