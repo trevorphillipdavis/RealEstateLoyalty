@@ -10,23 +10,40 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #fafafa; color: #333; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-    .card { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); width: 100%; max-width: 400px; text-align: center; border: 1px solid #eaeaea; }
-    .brand { font-size: 1.5rem; font-weight: bold; color: #1e3a8a; margin-bottom: 5px; }
-    .subtitle { font-size: 0.9rem; color: #666; margin-bottom: 25px; }
+    .card { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); width: 100%; max-width: 440px; border: 1px solid #eaeaea; }
+    .brand { font-size: 1.6rem; font-weight: bold; color: #1e3a8a; margin-bottom: 5px; text-align: center; }
+    .subtitle { font-size: 0.9rem; color: #666; margin-bottom: 25px; text-align: center; }
+    .hidden { display: none !important; }
+    
+    /* Form Styles */
     .form-group { text-align: left; margin-bottom: 15px; }
     label { display: block; font-size: 0.85rem; font-weight: 600; color: #444; margin-bottom: 6px; }
-    input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; outline: none; transition: border-color 0.2s; }
-    input:focus { border-color: #1e3a8a; }
+    input, textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; outline: none; font-family: inherit; }
+    input:focus, textarea:focus { border-color: #1e3a8a; }
     button { width: 100%; padding: 14px; background: #1e3a8a; color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-top: 10px; transition: background 0.2s; }
     button:hover { background: #111827; }
-    .msg { margin-top: 15px; font-size: 0.9rem; font-weight: 500; }
+    .msg { margin-top: 15px; font-size: 0.9rem; font-weight: 500; text-align: center; }
+    .toggle-auth { margin-top: 15px; font-size: 0.85rem; color: #1e3a8a; cursor: pointer; text-align: center; display: block; }
+
+    /* Dashboard UI Specifics */
+    .points-display { background: #f0f4ff; border: 2px dashed #1e3a8a; padding: 20px; border-radius: 12px; margin: 20px 0; text-align: center; }
+    .points-num { font-size: 3rem; font-weight: 900; color: #1e3a8a; }
+    .tier-badge { display: inline-block; padding: 6px 14px; background: #e5e7eb; border-radius: 50px; font-weight: bold; font-size: 0.85rem; margin-top: 5px; text-transform: uppercase; }
+    .tier-Bronze { background: #cd7f32; color: white; }
+    .tier-Silver { background: #c0c0c0; color: #333; }
+    .tier-Gold { background: #ffd700; color: #333; }
+    
+    .divider { margin: 25px 0; border-bottom: 1px solid #eee; }
+    .logout-btn { background: #ef4444; margin-top: 20px; }
+    .logout-btn:hover { background: #dc2626; }
   </style>
 </head>
 <body>
 
-  <div class="card">
+  <!-- ================= AUTH CONTAINER ================= -->
+  <div id="authContainer" class="card">
     <div class="brand">Brokerage Rewards</div>
-    <div class="subtitle">Create your account to start earning points</div>
+    <div id="authSubtitle" class="subtitle">Create your account to start earning points</div>
     
     <div class="form-group">
       <label for="email">Email Address</label>
@@ -38,48 +55,154 @@
       <input type="password" id="password" placeholder="••••••••">
     </div>
     
-    <button onclick="handleRegister()">Create Account</button>
+    <button id="mainAuthBtn" onclick="handleAuthAction()">Create Account</button>
+    <span id="authToggleLink" class="toggle-auth" onclick="toggleAuthMode()">Already have an account? Log In</span>
     <div class="msg" id="statusMessage"></div>
   </div>
 
+  <!-- ================= DASHBOARD CONTAINER ================= -->
+  <div id="dashboardContainer" class="card hidden">
+    <div class="brand">Welcome Back!</div>
+    <div class="subtitle" id="clientNameHeader">Loading your profile...</div>
+
+    <!-- Tier & Points Tracking Display -->
+    <div class="points-display">
+      <p style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; color: #555;">Current Balance</p>
+      <div class="points-num" id="pointsVal">0</div>
+      <p style="font-size: 0.8rem; color: #666; margin-bottom: 5px;">1 Point = $1 Value</p>
+      <span id="tierBadge" class="tier-badge tier-Bronze">Bronze Member</span>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Referral Submission Form Component -->
+    <h3>Submit a New Referral</h3>
+    <p style="font-size: 0.8rem; color: #666; margin-bottom: 15px;">Earn points when your referral closes a transaction!</p>
+    
+    <div class="form-group">
+      <label for="refName">Friend's Full Name</label>
+      <input type="text" id="refName" placeholder="Jane Doe">
+    </div>
+    <div class="form-group">
+      <label for="refContact">Friend's Phone or Email</label>
+      <input type="text" id="refContact" placeholder="jane@example.com">
+    </div>
+    <button onclick="submitReferral()">Submit Referral</button>
+    <div class="msg" id="refStatusMessage"></div>
+
+    <button class="logout-btn" onclick="handleLogout()">Log Out</button>
+  </div>
+
   <script>
-    // REPLACE THESE WITH YOUR ACTUAL SUPABASE CREDS FROM YOUR DASHBOARD Setting -> API
-    const SUPABASE_URL = "https://pgudhthdmlcokwniuial.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBndWRodGhkbWxjb2t3bml1aWFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ1NTMxMTgsImV4cCI6MjEwMDEyOTExOH0.hZM89R6iIjBs6IVXDGRD0AwP4gF8ztdpxp73_x9sgyU";
+    // ===== REPLACE WITH YOUR EXACT SUPABASE CREDENTIALS =====
+    const SUPABASE_URL = "https://your-project-id.supabase.co";
+    const SUPABASE_ANON_KEY = "your-anon-public-key";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    async function handleRegister() {
+    let isSignUpMode = true;
+    let currentUser = null;
+
+    // Monitor login session state changes live
+    supabaseClient.auth.onAuthStateChange((event, session) => {
+      if (session) {
+        currentUser = session.user;
+        showDashboard();
+      } else {
+        currentUser = null;
+        showAuth();
+      }
+    });
+
+    function toggleAuthMode() {
+      isSignUpMode = !isSignUpMode;
+      document.getElementById('authSubtitle').innerText = isSignUpMode ? "Create your account to start earning points" : "Log in to view your points ledger";
+      document.getElementById('mainAuthBtn').innerText = isSignUpMode ? "Create Account" : "Log In";
+      document.getElementById('authToggleLink').innerText = isSignUpMode ? "Already have an account? Log In" : "Need an account? Sign Up";
+      document.getElementById('statusMessage').innerText = "";
+    }
+
+    async function handleAuthAction() {
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
       const msgDiv = document.getElementById('statusMessage');
       
       if(!email || !password) {
         msgDiv.style.color = '#ef4444';
-        msgDiv.innerText = "Please fill in all fields.";
+        msgDiv.innerText = "Please fill out all fields.";
         return;
       }
 
       msgDiv.style.color = '#374151';
-      msgDiv.innerText = "Processing registration...";
+      msgDiv.innerText = "Processing...";
 
-      const { data, error } = await supabaseClient.auth.signUp({ email, password });
-
-      if (error) {
-        msgDiv.style.color = '#ef4444';
-        msgDiv.innerText = "Error: " + error.message;
+      if (isSignUpMode) {
+        const { error } = await supabaseClient.auth.signUp({ email, password });
+        if (error) { msgDiv.style.color = '#ef4444'; msgDiv.innerText = error.message; }
+        else { msgDiv.style.color = '#10b981'; msgDiv.innerText = "Account initiated! Verify via your email inbox link."; }
       } else {
-        msgDiv.style.color = '#10b981';
-        msgDiv.innerText = "Account initiated! Please check your inbox for a verification email link.";
+        const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        if (error) { msgDiv.style.color = '#ef4444'; msgDiv.innerText = error.message; }
       }
     }
 
-    // Register PWA Service Worker
+    async function showDashboard() {
+      document.getElementById('authContainer').classList.add('hidden');
+      document.getElementById('dashboardContainer').classList.remove('hidden');
+      document.getElementById('clientNameHeader').innerText = currentUser.email;
+
+      // Realtime Client Profile Syncing Fetch
+      const { data: clientProfile } = await supabaseClient
+        .from('clients')
+        .select('total_points, current_tier')
+        .eq('id', currentUser.id)
+        .single();
+
+      if (clientProfile) {
+        document.getElementById('pointsVal').innerText = clientProfile.total_points || 0;
+        const badge = document.getElementById('tierBadge');
+        badge.innerText = `${clientProfile.current_tier || 'Bronze'} Member`;
+        badge.className = `tier-badge tier-${clientProfile.current_tier || 'Bronze'}`;
+      }
+    }
+
+    function showAuth() {
+      document.getElementById('dashboardContainer').classList.add('hidden');
+      document.getElementById('authContainer').classList.remove('hidden');
+    }
+
+    async function submitReferral() {
+      const name = document.getElementById('refName').value;
+      const contact = document.getElementById('refContact').value;
+      const refMsg = document.getElementById('refStatusMessage');
+
+      if(!name || !contact) {
+        refMsg.style.color = '#ef4444';
+        refMsg.innerText = "Please provide referral details.";
+        return;
+      }
+
+      const { error } = await supabaseClient.from('referrals').insert([
+        { referrer_client_id: currentUser.id, ref_first_name: name, ref_email: contact }
+      ]);
+
+      if(error) {
+        refMsg.style.color = '#ef4444';
+        refMsg.innerText = "Error saving referral.";
+      } else {
+        refMsg.style.color = '#10b981';
+        refMsg.innerText = "Referral submitted successfully! 👍";
+        document.getElementById('refName').value = "";
+        document.getElementById('refContact').value = "";
+      }
+    }
+
+    async function handleLogout() {
+      await supabaseClient.auth.signOut();
+    }
+
+    // Register PWA service engine
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js')
-          .then(reg => console.log('Service Worker ready:', reg.scope))
-          .catch(err => console.log('Service Worker failed:', err));
-      });
+      window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js'); });
     }
   </script>
 </body>
