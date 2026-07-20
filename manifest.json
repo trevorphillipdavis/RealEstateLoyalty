@@ -1,0 +1,22 @@
+{
+  "name": "Brokerage Loyalty Rewards",
+  "short_name": "BrokerRewards",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#fafafa",
+  "theme_color": "#1e3a8a",
+  "description": "Track your loyalty points, check your status tier, and search local home listings.",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://placehold.co/192x192/1e3a8a/ffffff/png?text=Rewards",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "https://placehold.co/512x512/1e3a8a/ffffff/png?text=Rewards",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
+}

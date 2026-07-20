@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Brokerage Rewards</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1e3a8a">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #fafafa; color: #333; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+    .card { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); width: 100%; max-width: 400px; text-align: center; border: 1px solid #eaeaea; }
+    .brand { font-size: 1.5rem; font-weight: bold; color: #1e3a8a; margin-bottom: 5px; }
+    .subtitle { font-size: 0.9rem; color: #666; margin-bottom: 25px; }
+    .form-group { text-align: left; margin-bottom: 15px; }
+    label { display: block; font-size: 0.85rem; font-weight: 600; color: #444; margin-bottom: 6px; }
+    input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; outline: none; transition: border-color 0.2s; }
+    input:focus { border-color: #1e3a8a; }
+    button { width: 100%; padding: 14px; background: #1e3a8a; color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-top: 10px; transition: background 0.2s; }
+    button:hover { background: #111827; }
+    .msg { margin-top: 15px; font-size: 0.9rem; font-weight: 500; }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <div class="brand">Brokerage Rewards</div>
+    <div class="subtitle">Create your account to start earning points</div>
+    
+    <div class="form-group">
+      <label for="email">Email Address</label>
+      <input type="email" id="email" placeholder="hello@example.com">
+    </div>
+    
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input type="password" id="password" placeholder="••••••••">
+    </div>
+    
+    <button onclick="handleRegister()">Create Account</button>
+    <div class="msg" id="statusMessage"></div>
+  </div>
+
+  <script>
+    // REPLACE THESE WITH YOUR ACTUAL SUPABASE CREDS FROM YOUR DASHBOARD Setting -> API
+    const SUPABASE_URL = "https://pgudhthdmlcokwniuial.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBndWRodGhkbWxjb2t3bml1aWFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ1NTMxMTgsImV4cCI6MjEwMDEyOTExOH0.hZM89R6iIjBs6IVXDGRD0AwP4gF8ztdpxp73_x9sgyU";
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    async function handleRegister() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const msgDiv = document.getElementById('statusMessage');
+      
+      if(!email || !password) {
+        msgDiv.style.color = '#ef4444';
+        msgDiv.innerText = "Please fill in all fields.";
+        return;
+      }
+
+      msgDiv.style.color = '#374151';
+      msgDiv.innerText = "Processing registration...";
+
+      const { data, error } = await supabaseClient.auth.signUp({ email, password });
+
+      if (error) {
+        msgDiv.style.color = '#ef4444';
+        msgDiv.innerText = "Error: " + error.message;
+      } else {
+        msgDiv.style.color = '#10b981';
+        msgDiv.innerText = "Account initiated! Please check your inbox for a verification email link.";
+      }
+    }
+
+    // Register PWA Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('Service Worker ready:', reg.scope))
+          .catch(err => console.log('Service Worker failed:', err));
+      });
+    }
+  </script>
+</body>
+</html>
