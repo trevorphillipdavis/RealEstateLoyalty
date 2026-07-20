@@ -41,6 +41,13 @@
     .search-container-card { background: white; padding: 15px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); width: 100%; max-width: 440px; border: 1px solid #eaeaea; margin-bottom: 20px; }
     .iframe-wrapper { width: 100%; height: 560px; border-radius: 12px; overflow: hidden; border: 1px solid #e5e7eb; background: #fff; }
     
+    /* Admin Section UI Elements */
+    .admin-card { background: #fef2f2; border: 2px solid #fee2e2; padding: 25px; border-radius: 16px; width: 100%; max-width: 440px; margin-top: 10px; box-shadow: 0 4px 20px rgba(239, 68, 68, 0.05); }
+    .referral-item { background: white; padding: 15px; border-radius: 8px; border: 1px solid #fee2e2; margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+    .referral-header { font-weight: bold; color: #991b1b; display: flex; justify-content: space-between; }
+    .approve-btn { background: #10b981; padding: 8px 12px; font-size: 0.85rem; margin-top: 5px; }
+    .approve-btn:hover { background: #059669; }
+
     /* Bottom Navigation Bar Layout */
     .nav-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 440px; height: 70px; background: white; border-top: 1px solid #e5e7eb; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -4px 15px rgba(0,0,0,0.04); border-radius: 16px 16px 0 0; z-index: 999; }
     .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #9ca3af; cursor: pointer; font-size: 0.75rem; font-weight: 600; width: 50%; height: 100%; transition: color 0.2s; }
@@ -71,10 +78,10 @@
   </div>
 
   <!-- ================= MAIN PWA INTERFACE ================= -->
-  <div id="appInterface" class="hidden" style="width: 100%; max-width: 440px;">
+  <div id="appInterface" class="hidden" style="width: 100%; max-width: 440px; display: flex; flex-direction: column; align-items: center;">
     
     <!-- TAB 1: REWARDS & WALLET SECTION -->
-    <div id="tabWallet" class="card">
+    <div id="tabWallet" class="card" style="width: 100%;">
       <div class="brand">Welcome Back!</div>
       <div class="subtitle" id="clientNameHeader">Loading your profile...</div>
 
@@ -105,13 +112,21 @@
     </div>
 
     <!-- TAB 2: LIVE PROPERTY MAP SEARCH VIEW -->
-    <div id="tabSearch" class="search-container-card hidden">
+    <div id="tabSearch" class="search-container-card hidden" style="width: 100%;">
       <div class="brand">Browse Homes</div>
       <div class="subtitle" style="margin-bottom: 15px;">Live map search via BeachesMLS</div>
 
-      <!-- Displays live Matrix map rendering form once toggled in MLS settings -->
       <div class="iframe-wrapper">
         <iframe src="https://matrix.beachesmls.com/Matrix/public/IDX.aspx?idx=bd87e7" width="100%" height="100%" frameborder="0" marginwidth="0" marginheight="0"></iframe>
+      </div>
+    </div>
+
+    <!-- ================= SECURE ADMIN CONTROL PANEL ================= -->
+    <div id="adminPanel" class="admin-card hidden" style="width: 100%;">
+      <h3 style="color: #991b1b; border-bottom: 1px solid #fee2e2; padding-bottom: 8px;">🛡️ Agent Dashboard</h3>
+      <p style="font-size: 0.8rem; color: #7f1d1d; margin-top: 4px;">Pending referral approvals queue:</p>
+      <div id="adminReferralsQueue">
+        <!-- Live pending referrals pull here dynamically -->
       </div>
     </div>
 
@@ -137,6 +152,7 @@
 
     let isSignUpMode = true;
     let currentUser = null;
+    const ADMIN_EMAIL = "trevordavis74@gmail.com";
 
     supabaseClient.auth.onAuthStateChange((event, session) => {
       if (session) {
@@ -212,6 +228,15 @@
       document.getElementById('appInterface').classList.remove('hidden');
       document.getElementById('clientNameHeader').innerText = currentUser.email;
 
+      // Secure Admin Interface Gate Check
+      if (currentUser.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+        document.getElementById('adminPanel').classList.remove('hidden');
+        loadPendingReferrals();
+      } else {
+        document.getElementById('adminPanel').classList.add('hidden');
+      }
+
+      // Fetch points
       const { data: clientProfile } = await supabaseClient
         .from('clients')
         .select('total_points, current_tier')
@@ -224,6 +249,71 @@
         badge.innerText = `${clientProfile.current_tier || 'Bronze'} Member`;
         badge.className = `tier-badge tier-${clientProfile.current_tier || 'Bronze'}`;
       }
+    }
+
+    // Load Admin Queue items from Supabase
+    async function loadPendingReferrals() {
+      const queueContainer = document.getElementById('adminReferralsQueue');
+      queueContainer.innerHTML = `<p style="font-size:0.8rem; color:#888; margin-top:10px;">Checking ledger requests...</p>`;
+
+      const { data: referrals, error } = await supabaseClient
+        .from('referrals')
+        .select('*')
+        .eq('status', 'pending');
+
+      if (error || !referrals || referrals.length === 0) {
+        queueContainer.innerHTML = `<p style="font-size:0.85rem; color:#059669; font-weight:bold; margin-top:10px;">✅ All caught up! No pending referrals.</p>`;
+        return;
+      }
+
+      queueContainer.innerHTML = "";
+      referrals.forEach(ref => {
+        queueContainer.innerHTML += `
+          <div class="referral-item" id="ref-card-${ref.id}">
+            <div class="referral-header">
+              <span>👤 ${ref.ref_first_name}</span>
+              <span style="font-size:0.75rem; background:#fee2e2; padding:2px 6px; border-radius:4px;">PENDING</span>
+            </div>
+            <div style="font-size:0.8rem; color:#555;">Contact: ${ref.ref_email}</div>
+            <button class="approve-btn" onclick="approveReferral(${ref.id}, '${ref.referrer_client_id}')">Approve & Award 500 Pts</button>
+          </div>
+        `;
+      });
+    }
+
+    // Transaction pipeline: Award points, update status, refresh dashboard UI
+    async function approveReferral(referralId, clientUuid) {
+      // 1. Get current points value
+      const { data: profile } = await supabaseClient
+        .from('clients')
+        .select('total_points')
+        .eq('id', clientUuid)
+        .single();
+
+      const newPointsTotal = (profile?.total_points || 0) + 500;
+
+      // 2. Update client points balance directly
+      await supabaseClient
+        .from('clients')
+        .update({ total_points: newPointsTotal })
+        .eq('id', clientUuid);
+
+      // 3. Update status to 'approved'
+      await supabaseClient
+        .from('referrals')
+        .update({ status: 'approved' })
+        .eq('id', referralId);
+
+      // 4. Log historic entry into points_ledger
+      await supabaseClient
+        .from('points_ledger')
+        .insert([
+          { client_id: clientUuid, amount: 500, action_type: 'referral_bonus', description: 'Approved closed referral transaction award' }
+        ]);
+
+      alert("Referral Approved! 500 points successfully added to client wallet.");
+      loadPendingReferrals(); // Refresh admin queue view
+      showDashboard(); // Refresh matching point balance counters immediately
     }
 
     function showAuth() {
@@ -258,6 +348,11 @@
         refMsg.innerText = "Referral submitted successfully! 👍";
         document.getElementById('refName').value = "";
         document.getElementById('refContact').value = "";
+        
+        // Auto-refresh admin queue if admin submits a test to themselves
+        if (currentUser.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+          loadPendingReferrals();
+        }
       }
     }
 
