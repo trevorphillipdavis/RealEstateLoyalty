@@ -45,8 +45,9 @@
     .admin-card { background: #fef2f2; border: 2px solid #fee2e2; padding: 25px; border-radius: 16px; width: 100%; max-width: 440px; margin-top: 10px; box-shadow: 0 4px 20px rgba(239, 68, 68, 0.05); }
     .referral-item { background: white; padding: 15px; border-radius: 8px; border: 1px solid #fee2e2; margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
     .referral-header { font-weight: bold; color: #991b1b; display: flex; justify-content: space-between; }
-    .approve-btn { background: #10b981; padding: 8px 12px; font-size: 0.85rem; margin-top: 5px; }
-    .approve-btn:hover { background: #059669; }
+    .action-btn-row { display: flex; gap: 8px; margin-top: 5px; }
+    .btn-accept { background: #2563eb; padding: 8px 12px; font-size: 0.8rem; margin-top: 5px; }
+    .btn-close { background: #10b981; padding: 8px 12px; font-size: 0.8rem; margin-top: 5px; }
 
     /* Bottom Navigation Bar Layout */
     .nav-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 440px; height: 70px; background: white; border-top: 1px solid #e5e7eb; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -4px 15px rgba(0,0,0,0.04); border-radius: 16px 16px 0 0; z-index: 999; }
@@ -124,9 +125,9 @@
     <!-- ================= SECURE ADMIN CONTROL PANEL ================= -->
     <div id="adminPanel" class="admin-card hidden" style="width: 100%;">
       <h3 style="color: #991b1b; border-bottom: 1px solid #fee2e2; padding-bottom: 8px;">🛡️ Agent Dashboard</h3>
-      <p style="font-size: 0.8rem; color: #7f1d1d; margin-top: 4px;">Pending referral approvals queue:</p>
+      <p style="font-size: 0.8rem; color: #7f1d1d; margin-top: 4px;">Active Pipelines Queue:</p>
       <div id="adminReferralsQueue">
-        <!-- Live pending referrals pull here dynamically -->
+        <!-- Live pipeline filters here dynamically -->
       </div>
     </div>
 
@@ -228,7 +229,6 @@
       document.getElementById('appInterface').classList.remove('hidden');
       document.getElementById('clientNameHeader').innerText = currentUser.email;
 
-      // Secure Admin Interface Gate Check
       if (currentUser.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
         document.getElementById('adminPanel').classList.remove('hidden');
         loadPendingReferrals();
@@ -236,7 +236,6 @@
         document.getElementById('adminPanel').classList.add('hidden');
       }
 
-      // Fetch points
       const { data: clientProfile } = await supabaseClient
         .from('clients')
         .select('total_points, current_tier')
@@ -251,7 +250,7 @@
       }
     }
 
-    // Load Admin Queue items from Supabase
+    // MODIFIED ADMIN PULL: Grab anything that isn't fully closed yet
     async function loadPendingReferrals() {
       const queueContainer = document.getElementById('adminReferralsQueue');
       queueContainer.innerHTML = `<p style="font-size:0.8rem; color:#888; margin-top:10px;">Checking ledger requests...</p>`;
@@ -259,31 +258,56 @@
       const { data: referrals, error } = await supabaseClient
         .from('referrals')
         .select('*')
-        .eq('status', 'pending');
+        .neq('status', 'closed'); // Grabs 'pending' and 'accepted' variants
 
       if (error || !referrals || referrals.length === 0) {
-        queueContainer.innerHTML = `<p style="font-size:0.85rem; color:#059669; font-weight:bold; margin-top:10px;">✅ All caught up! No pending referrals.</p>`;
+        queueContainer.innerHTML = `<p style="font-size:0.85rem; color:#059669; font-weight:bold; margin-top:10px;">✅ Pipelines clean! No active items.</p>`;
         return;
       }
 
       queueContainer.innerHTML = "";
       referrals.forEach(ref => {
+        const isPending = ref.status === 'pending';
+        
         queueContainer.innerHTML += `
           <div class="referral-item" id="ref-card-${ref.id}">
             <div class="referral-header">
               <span>👤 ${ref.ref_first_name}</span>
-              <span style="font-size:0.75rem; background:#fee2e2; padding:2px 6px; border-radius:4px;">PENDING</span>
+              <span style="font-size:0.75rem; background: ${isPending ? '#fee2e2' : '#dbeafe'}; color: ${isPending ? '#991b1b' : '#1e40af'}; padding:2px 6px; border-radius:4px;">
+                ${ref.status.toUpperCase()}
+              </span>
             </div>
             <div style="font-size:0.8rem; color:#555;">Contact: ${ref.ref_email}</div>
-            <button class="approve-btn" onclick="approveReferral(${ref.id}, '${ref.referrer_client_id}')">Approve & Award 500 Pts</button>
+            
+            <div class="action-btn-row">
+              ${isPending ? 
+                `<button class="btn-accept" onclick="acceptReferral(${ref.id})">Accept Lead ✓</button>` : 
+                `<button class="btn-close" onclick="closeTransaction(${ref.id}, '${ref.referrer_client_id}')">Mark Closed & Award 500 Pts 💰</button>`
+              }
+            </div>
           </div>
         `;
       });
     }
 
-    // Transaction pipeline: Award points, update status, refresh dashboard UI
-    async function approveReferral(referralId, clientUuid) {
-      // 1. Get current points value
+    // PHASE 1: Move from pending to accepted (No points yet)
+    async function acceptReferral(referralId) {
+      const { error } = await supabaseClient
+        .from('referrals')
+        .update({ status: 'accepted' })
+        .eq('id', referralId);
+
+      if (error) {
+        alert("Error moving lead to active: " + error.message);
+      } else {
+        alert("Referral lead accepted and moved to active tracking!");
+        loadPendingReferrals();
+      }
+    }
+
+    // PHASE 2: Complete closing transaction (Awards 500 points)
+    async function closeTransaction(referralId, clientUuid) {
+      // 1. Fetch old balance metrics
       const { data: profile } = await supabaseClient
         .from('clients')
         .select('total_points')
@@ -292,28 +316,28 @@
 
       const newPointsTotal = (profile?.total_points || 0) + 500;
 
-      // 2. Update client points balance directly
+      // 2. Adjust points value balance
       await supabaseClient
         .from('clients')
         .update({ total_points: newPointsTotal })
         .eq('id', clientUuid);
 
-      // 3. Update status to 'approved'
+      // 3. Update state tracking parameter to closed
       await supabaseClient
         .from('referrals')
-        .update({ status: 'approved' })
+        .update({ status: 'closed' })
         .eq('id', referralId);
 
-      // 4. Log historic entry into points_ledger
+      // 4. Log historic metrics ledger record entries
       await supabaseClient
         .from('points_ledger')
         .insert([
-          { client_id: clientUuid, amount: 500, action_type: 'referral_bonus', description: 'Approved closed referral transaction award' }
+          { client_id: clientUuid, amount: 500, action_type: 'referral_bonus', description: 'Closed home purchase transaction payout settlement' }
         ]);
 
-      alert("Referral Approved! 500 points successfully added to client wallet.");
-      loadPendingReferrals(); // Refresh admin queue view
-      showDashboard(); // Refresh matching point balance counters immediately
+      alert("Transaction finalized successfully! 500 points dispatched to customer ledger wallet.");
+      loadPendingReferrals();
+      showDashboard();
     }
 
     function showAuth() {
@@ -349,7 +373,6 @@
         document.getElementById('refName').value = "";
         document.getElementById('refContact').value = "";
         
-        // Auto-refresh admin queue if admin submits a test to themselves
         if (currentUser.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
           loadPendingReferrals();
         }
