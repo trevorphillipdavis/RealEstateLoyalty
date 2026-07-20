@@ -94,9 +94,10 @@
   </div>
 
   <script>
-    // ===== REPLACE WITH YOUR EXACT SUPABASE CREDENTIALS =====
+    // ===== AUTOMATICALLY INJECTED SUPABASE CREDENTIALS =====
     const SUPABASE_URL = "https://pgudhthdmlcokwniuial.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBndWRodGhkbWxjb2t3bml1aWFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ1NTMxMTgsImV4cCI6MjEwMDEyOTExOH0.hZM89R6iIjBs6IVXDGRD0AwP4gF8ztdpxp73_x9sgyU";
+    
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let isSignUpMode = true;
@@ -136,7 +137,6 @@
       msgDiv.innerText = "Processing...";
 
       if (isSignUpMode) {
-        // FIXED: Included explicit options path mapping to prevent the verification redirect loophole
         const { error } = await supabaseClient.auth.signUp({ 
           email, 
           password,
@@ -197,13 +197,21 @@
         return;
       }
 
+      refMsg.style.color = '#374151';
+      refMsg.innerText = "Submitting referral...";
+
       const { error } = await supabaseClient.from('referrals').insert([
-        { referrer_client_id: currentUser.id, ref_first_name: name, ref_email: contact }
+        { 
+          referrer_client_id: currentUser.id, 
+          ref_first_name: name, 
+          ref_email: contact 
+        }
       ]);
 
       if(error) {
+        console.error("Supabase Error Details:", error);
         refMsg.style.color = '#ef4444';
-        refMsg.innerText = "Error saving referral.";
+        refMsg.innerText = `Error saving referral: ${error.message}`;
       } else {
         refMsg.style.color = '#10b981';
         refMsg.innerText = "Referral submitted successfully! 👍";
