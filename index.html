@@ -41,17 +41,16 @@
     .search-container-card { background: white; padding: 15px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); width: 100%; max-width: 440px; border: 1px solid #eaeaea; margin-bottom: 20px; }
     .iframe-wrapper { width: 100%; height: 560px; border-radius: 12px; overflow: hidden; border: 1px solid #e5e7eb; background: #fff; }
     
-    /* Admin Section UI Elements */
-    .admin-card { background: #fef2f2; border: 2px solid #fee2e2; padding: 25px; border-radius: 16px; width: 100%; max-width: 440px; margin-top: 10px; box-shadow: 0 4px 20px rgba(239, 68, 68, 0.05); }
-    .referral-item { background: white; padding: 15px; border-radius: 8px; border: 1px solid #fee2e2; margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
-    .referral-header { font-weight: bold; color: #991b1b; display: flex; justify-content: space-between; }
+    /* Admin Dashboard Specific Items */
+    .referral-item { background: #fafafa; padding: 15px; border-radius: 8px; border: 1px solid #e5e7eb; margin-top: 12px; display: flex; flex-direction: column; gap: 6px; text-align: left; }
+    .referral-header { font-weight: bold; color: #1e3a8a; display: flex; justify-content: space-between; align-items: center; }
     .action-btn-row { display: flex; gap: 8px; margin-top: 5px; }
     .btn-accept { background: #2563eb; padding: 8px 12px; font-size: 0.8rem; margin-top: 5px; }
     .btn-close { background: #10b981; padding: 8px 12px; font-size: 0.8rem; margin-top: 5px; }
 
-    /* Bottom Navigation Bar Layout */
+    /* Flex-Adaptive Bottom Navigation Bar */
     .nav-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 440px; height: 70px; background: white; border-top: 1px solid #e5e7eb; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -4px 15px rgba(0,0,0,0.04); border-radius: 16px 16px 0 0; z-index: 999; }
-    .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #9ca3af; cursor: pointer; font-size: 0.75rem; font-weight: 600; width: 50%; height: 100%; transition: color 0.2s; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #9ca3af; cursor: pointer; font-size: 0.75rem; font-weight: 600; flex-grow: 1; height: 100%; transition: color 0.2s; }
     .nav-item.active { color: #1e3a8a; }
     .nav-icon { font-size: 1.4rem; margin-bottom: 2px; }
   </style>
@@ -79,10 +78,10 @@
   </div>
 
   <!-- ================= MAIN PWA INTERFACE ================= -->
-  <div id="appInterface" class="hidden" style="width: 100%; max-width: 440px; display: flex; flex-direction: column; align-items: center;">
+  <div id="appInterface" class="hidden" style="width: 100%; max-width: 440px;">
     
     <!-- TAB 1: REWARDS & WALLET SECTION -->
-    <div id="tabWallet" class="card" style="width: 100%;">
+    <div id="tabWallet" class="card">
       <div class="brand">Welcome Back!</div>
       <div class="subtitle" id="clientNameHeader">Loading your profile...</div>
 
@@ -113,7 +112,7 @@
     </div>
 
     <!-- TAB 2: LIVE PROPERTY MAP SEARCH VIEW -->
-    <div id="tabSearch" class="search-container-card hidden" style="width: 100%;">
+    <div id="tabSearch" class="search-container-card hidden">
       <div class="brand">Browse Homes</div>
       <div class="subtitle" style="margin-bottom: 15px;">Live map search via BeachesMLS</div>
 
@@ -122,17 +121,21 @@
       </div>
     </div>
 
-    <!-- ================= SECURE ADMIN CONTROL PANEL ================= -->
-    <div id="adminPanel" class="admin-card hidden" style="width: 100%;">
-      <h3 style="color: #991b1b; border-bottom: 1px solid #fee2e2; padding-bottom: 8px;">🛡️ Agent Dashboard</h3>
-      <p style="font-size: 0.8rem; color: #7f1d1d; margin-top: 4px;">Active Pipelines Queue:</p>
+    <!-- TAB 3: AGENT DASHBOARD PORTAL -->
+    <div id="tabAdmin" class="card hidden">
+      <div class="brand" style="color: #bc1a1a;">Agent Dashboard</div>
+      <div class="subtitle">Manage incoming leads and transaction completions</div>
+      
+      <p style="font-size: 0.85rem; font-weight: bold; color: #374151; border-bottom: 1px solid #eee; padding-bottom: 6px; margin-top: 10px;">
+        Active Pipelines Queue:
+      </p>
       <div id="adminReferralsQueue">
         <!-- Live pipeline filters here dynamically -->
       </div>
     </div>
 
     <!-- FIXED STICKY NAVIGATION BAR -->
-    <nav class="nav-bar">
+    <nav class="nav-bar" id="appNavBar">
       <div class="nav-item active" id="navWallet" onclick="switchTab('wallet')">
         <span class="nav-icon">💎</span>
         <span>My Rewards</span>
@@ -140,6 +143,11 @@
       <div class="nav-item" id="navSearch" onclick="switchTab('search')">
         <span class="nav-icon">🏠</span>
         <span>Browse Homes</span>
+      </div>
+      <!-- Built directly into HTML structure now to prevent rendering delay -->
+      <div class="nav-item hidden" id="navAdmin" onclick="switchTab('admin')">
+        <span class="nav-icon">🛡️</span>
+        <span>Agent Portal</span>
       </div>
     </nav>
 
@@ -166,16 +174,24 @@
     });
 
     function switchTab(targetTab) {
+      document.getElementById('tabWallet').classList.add('hidden');
+      document.getElementById('tabSearch').classList.add('hidden');
+      document.getElementById('tabAdmin').classList.add('hidden');
+
+      document.getElementById('navWallet').classList.remove('active');
+      document.getElementById('navSearch').classList.remove('active');
+      document.getElementById('navAdmin').classList.remove('active');
+
       if(targetTab === 'wallet') {
         document.getElementById('tabWallet').classList.remove('hidden');
-        document.getElementById('tabSearch').classList.add('hidden');
         document.getElementById('navWallet').classList.add('active');
-        document.getElementById('navSearch').classList.remove('active');
-      } else {
-        document.getElementById('tabWallet').classList.add('hidden');
+      } else if (targetTab === 'search') {
         document.getElementById('tabSearch').classList.remove('hidden');
-        document.getElementById('navWallet').classList.remove('active');
         document.getElementById('navSearch').classList.add('active');
+      } else if (targetTab === 'admin') {
+        document.getElementById('tabAdmin').classList.remove('hidden');
+        document.getElementById('navAdmin').classList.add('active');
+        loadPendingReferrals();
       }
     }
 
@@ -229,11 +245,12 @@
       document.getElementById('appInterface').classList.remove('hidden');
       document.getElementById('clientNameHeader').innerText = currentUser.email;
 
+      // Unhide the pre-rendered admin tab instantly if match confirms
       if (currentUser.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
-        document.getElementById('adminPanel').classList.remove('hidden');
+        document.getElementById('navAdmin').classList.remove('hidden');
         loadPendingReferrals();
       } else {
-        document.getElementById('adminPanel').classList.add('hidden');
+        document.getElementById('navAdmin').classList.add('hidden');
       }
 
       const { data: clientProfile } = await supabaseClient
@@ -250,7 +267,6 @@
       }
     }
 
-    // MODIFIED ADMIN PULL: Grab anything that isn't fully closed yet
     async function loadPendingReferrals() {
       const queueContainer = document.getElementById('adminReferralsQueue');
       queueContainer.innerHTML = `<p style="font-size:0.8rem; color:#888; margin-top:10px;">Checking ledger requests...</p>`;
@@ -258,7 +274,7 @@
       const { data: referrals, error } = await supabaseClient
         .from('referrals')
         .select('*')
-        .neq('status', 'closed'); // Grabs 'pending' and 'accepted' variants
+        .neq('status', 'closed');
 
       if (error || !referrals || referrals.length === 0) {
         queueContainer.innerHTML = `<p style="font-size:0.85rem; color:#059669; font-weight:bold; margin-top:10px;">✅ Pipelines clean! No active items.</p>`;
@@ -273,11 +289,11 @@
           <div class="referral-item" id="ref-card-${ref.id}">
             <div class="referral-header">
               <span>👤 ${ref.ref_first_name}</span>
-              <span style="font-size:0.75rem; background: ${isPending ? '#fee2e2' : '#dbeafe'}; color: ${isPending ? '#991b1b' : '#1e40af'}; padding:2px 6px; border-radius:4px;">
+              <span style="font-size:0.72rem; font-weight:bold; background: ${isPending ? '#fee2e2' : '#dbeafe'}; color: ${isPending ? '#991b1b' : '#1e40af'}; padding:3px 8px; border-radius:4px;">
                 ${ref.status.toUpperCase()}
               </span>
             </div>
-            <div style="font-size:0.8rem; color:#555;">Contact: ${ref.ref_email}</div>
+            <div style="font-size:0.8rem; color:#666;">Contact: ${ref.ref_email}</div>
             
             <div class="action-btn-row">
               ${isPending ? 
@@ -290,7 +306,6 @@
       });
     }
 
-    // PHASE 1: Move from pending to accepted (No points yet)
     async function acceptReferral(referralId) {
       const { error } = await supabaseClient
         .from('referrals')
@@ -305,9 +320,7 @@
       }
     }
 
-    // PHASE 2: Complete closing transaction (Awards 500 points)
     async function closeTransaction(referralId, clientUuid) {
-      // 1. Fetch old balance metrics
       const { data: profile } = await supabaseClient
         .from('clients')
         .select('total_points')
@@ -316,19 +329,16 @@
 
       const newPointsTotal = (profile?.total_points || 0) + 500;
 
-      // 2. Adjust points value balance
       await supabaseClient
         .from('clients')
         .update({ total_points: newPointsTotal })
         .eq('id', clientUuid);
 
-      // 3. Update state tracking parameter to closed
       await supabaseClient
         .from('referrals')
         .update({ status: 'closed' })
         .eq('id', referralId);
 
-      // 4. Log historic metrics ledger record entries
       await supabaseClient
         .from('points_ledger')
         .insert([
