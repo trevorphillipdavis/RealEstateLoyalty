@@ -27,7 +27,7 @@
     .msg { margin-top: 15px; font-size: 0.9rem; font-weight: 500; text-align: center; }
     .toggle-auth { margin-top: 15px; font-size: 0.85rem; color: #1e3a8a; cursor: pointer; text-align: center; display: block; }
 
-    /* Dashboard UI Specifics */
+    /* Dashboard UI */
     .points-display { background: #f0f4ff; border: 2px dashed #1e3a8a; padding: 20px; border-radius: 12px; margin: 20px 0; text-align: center; }
     .points-num { font-size: 3rem; font-weight: 900; color: #1e3a8a; }
     .tier-badge { display: inline-block; padding: 6px 14px; background: #e5e7eb; border-radius: 50px; font-weight: bold; font-size: 0.85rem; margin-top: 5px; text-transform: uppercase; }
@@ -39,13 +39,12 @@
     .logout-btn { background: #ef4444; margin-top: 20px; }
     .logout-btn:hover { background: #dc2626; }
 
-    /* Map Interface Display Components */
     .search-container-card { background: white; padding: 15px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); width: 100%; max-width: 440px; border: 1px solid #eaeaea; margin-bottom: 20px; }
     .iframe-wrapper { width: 100%; height: 560px; border-radius: 12px; overflow: hidden; border: 1px solid #e5e7eb; background: #fff; }
     
-    /* Admin Pipeline Toggles & Queue */
+    /* Pipeline Toggles & Queue */
     .pipeline-tabs { display: flex; gap: 6px; margin: 15px 0 10px 0; background: #f3f4f6; padding: 4px; border-radius: 8px; }
-    .pipeline-btn { flex: 1; padding: 8px 4px; font-size: 0.75rem; border: none; background: transparent; color: #4b5563; font-weight: 600; border-radius: 6px; cursor: pointer; margin-top: 0; }
+    .pipeline-btn { flex: 1; padding: 8px 4px; font-size: 0.72rem; border: none; background: transparent; color: #4b5563; font-weight: 600; border-radius: 6px; cursor: pointer; margin-top: 0; }
     .pipeline-btn.active { background: white; color: #1e3a8a; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
     
     .referral-item { background: #fafafa; padding: 15px; border-radius: 8px; border: 1px solid #e5e7eb; margin-top: 10px; display: flex; flex-direction: column; gap: 6px; text-align: left; }
@@ -54,9 +53,10 @@
     
     .action-btn-row { display: flex; gap: 8px; margin-top: 5px; }
     .btn-accept { background: #2563eb; padding: 8px 12px; font-size: 0.8rem; margin-top: 5px; }
-    .btn-close { background: #10b981; padding: 8px 12px; font-size: 0.8rem; margin-top: 5px; }
+    .btn-request { background: #d97706; padding: 8px 12px; font-size: 0.8rem; margin-top: 5px; }
+    .btn-approve { background: #10b981; padding: 8px 12px; font-size: 0.8rem; margin-top: 5px; }
 
-    /* Flex-Adaptive Bottom Navigation Bar */
+    /* Bottom Navigation Bar */
     .nav-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 440px; height: 70px; background: white; border-top: 1px solid #e5e7eb; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -4px 15px rgba(0,0,0,0.04); border-radius: 16px 16px 0 0; z-index: 999; }
     .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #9ca3af; cursor: pointer; font-size: 0.75rem; font-weight: 600; flex-grow: 1; height: 100%; transition: color 0.2s; }
     .nav-item.active { color: #1e3a8a; }
@@ -65,7 +65,7 @@
 </head>
 <body>
 
-  <!-- ================= AUTH CONTAINER ================= -->
+  <!-- AUTH CONTAINER -->
   <div id="authContainer" class="card">
     <div class="brand">Brokerage Rewards</div>
     <div id="authSubtitle" class="subtitle">Create your account to start earning points</div>
@@ -85,13 +85,13 @@
     <div class="msg" id="statusMessage"></div>
   </div>
 
-  <!-- ================= MAIN PWA INTERFACE ================= -->
+  <!-- MAIN INTERFACE -->
   <div id="appInterface" class="hidden" style="width: 100%; max-width: 440px;">
     
-    <!-- TAB 1: REWARDS & WALLET SECTION -->
+    <!-- TAB 1: CLIENT WALLET -->
     <div id="tabWallet" class="card">
       <div class="brand">Welcome Back!</div>
-      <div class="subtitle" id="clientNameHeader">Loading your profile...</div>
+      <div class="subtitle" id="clientNameHeader">Loading profile...</div>
 
       <div class="points-display">
         <p style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; color: #555;">Current Balance</p>
@@ -105,7 +105,6 @@
       <h3>Submit a New Referral</h3>
       <p style="font-size: 0.8rem; color: #666; margin-bottom: 15px;">Earn points when your referral closes a transaction!</p>
       
-      <!-- Four-Field Referral Submission Form -->
       <div class="form-row">
         <div class="form-group">
           <label for="refFirstName">First Name</label>
@@ -133,7 +132,7 @@
       <button class="logout-btn" onclick="handleLogout()">Log Out</button>
     </div>
 
-    <!-- TAB 2: LIVE PROPERTY MAP SEARCH VIEW -->
+    <!-- TAB 2: BEACHESMLS MAP SEARCH -->
     <div id="tabSearch" class="search-container-card hidden">
       <div class="brand">Browse Homes</div>
       <div class="subtitle" style="margin-bottom: 15px;">Live map search via BeachesMLS</div>
@@ -143,23 +142,30 @@
       </div>
     </div>
 
-    <!-- TAB 3: AGENT DASHBOARD PORTAL -->
-    <div id="tabAdmin" class="card hidden">
-      <div class="brand" style="color: #bc1a1a;">Agent Dashboard</div>
-      <div class="subtitle" style="margin-bottom:10px;">Pipeline Management</div>
+    <!-- TAB 3: AGENT PORTAL -->
+    <div id="tabAgent" class="card hidden">
+      <div class="brand" style="color: #1e3a8a;">Agent Portal</div>
+      <div class="subtitle" style="margin-bottom:10px;">Assigned Leads Pipeline</div>
       
       <div class="pipeline-tabs">
-        <button class="pipeline-btn active" id="filterPending" onclick="setPipelineFilter('pending')">Open (Pending)</button>
-        <button class="pipeline-btn" id="filterAccepted" onclick="setPipelineFilter('accepted')">Accepted</button>
-        <button class="pipeline-btn" id="filterClosed" onclick="setPipelineFilter('closed')">Closed</button>
+        <button class="pipeline-btn active" id="agentFilterPending" onclick="setAgentFilter('pending')">Open</button>
+        <button class="pipeline-btn" id="agentFilterAccepted" onclick="setAgentFilter('accepted')">Accepted</button>
+        <button class="pipeline-btn" id="agentFilterApproval" onclick="setAgentFilter('pending_broker_approval')">Pending Broker</button>
+        <button class="pipeline-btn" id="agentFilterClosed" onclick="setAgentFilter('closed')">Closed</button>
       </div>
 
-      <div id="adminReferralsQueue">
-        <!-- Live Detailed Cards Populate Here -->
-      </div>
+      <div id="agentQueue"></div>
     </div>
 
-    <!-- FIXED STICKY NAVIGATION BAR -->
+    <!-- TAB 4: BROKER APPROVAL PORTAL -->
+    <div id="tabBroker" class="card hidden">
+      <div class="brand" style="color: #bc1a1a;">Broker Approval</div>
+      <div class="subtitle" style="margin-bottom:10px;">Review Point Award Requests</div>
+      
+      <div id="brokerQueue"></div>
+    </div>
+
+    <!-- DYNAMIC NAVIGATION BAR -->
     <nav class="nav-bar" id="appNavBar">
       <div class="nav-item active" id="navWallet" onclick="switchTab('wallet')">
         <span class="nav-icon">💎</span>
@@ -169,9 +175,13 @@
         <span class="nav-icon">🏠</span>
         <span>Browse Homes</span>
       </div>
-      <div class="nav-item hidden" id="navAdmin" onclick="switchTab('admin')">
+      <div class="nav-item hidden" id="navAgent" onclick="switchTab('agent')">
         <span class="nav-icon">🛡️</span>
         <span>Agent Portal</span>
+      </div>
+      <div class="nav-item hidden" id="navBroker" onclick="switchTab('broker')">
+        <span class="nav-icon">👑</span>
+        <span>Brokerage</span>
       </div>
     </nav>
 
@@ -185,8 +195,8 @@
 
     let isSignUpMode = true;
     let currentUser = null;
-    let currentFilter = 'pending';
-    const ADMIN_EMAIL = "trevordavis74@gmail.com";
+    let userRole = 'client';
+    let agentFilter = 'pending';
 
     supabaseClient.auth.onAuthStateChange((event, session) => {
       if (session) {
@@ -201,11 +211,13 @@
     function switchTab(targetTab) {
       document.getElementById('tabWallet').classList.add('hidden');
       document.getElementById('tabSearch').classList.add('hidden');
-      document.getElementById('tabAdmin').classList.add('hidden');
+      document.getElementById('tabAgent').classList.add('hidden');
+      document.getElementById('tabBroker').classList.add('hidden');
 
       document.getElementById('navWallet').classList.remove('active');
       document.getElementById('navSearch').classList.remove('active');
-      document.getElementById('navAdmin').classList.remove('active');
+      if(document.getElementById('navAgent')) document.getElementById('navAgent').classList.remove('active');
+      if(document.getElementById('navBroker')) document.getElementById('navBroker').classList.remove('active');
 
       if(targetTab === 'wallet') {
         document.getElementById('tabWallet').classList.remove('hidden');
@@ -213,25 +225,25 @@
       } else if (targetTab === 'search') {
         document.getElementById('tabSearch').classList.remove('hidden');
         document.getElementById('navSearch').classList.add('active');
-      } else if (targetTab === 'admin') {
-        document.getElementById('tabAdmin').classList.remove('hidden');
-        document.getElementById('navAdmin').classList.add('active');
-        loadPendingReferrals();
+      } else if (targetTab === 'agent') {
+        document.getElementById('tabAgent').classList.remove('hidden');
+        document.getElementById('navAgent').classList.add('active');
+        loadAgentQueue();
+      } else if (targetTab === 'broker') {
+        document.getElementById('tabBroker').classList.remove('hidden');
+        document.getElementById('navBroker').classList.add('active');
+        loadBrokerQueue();
       }
     }
 
-    function setPipelineFilter(status) {
-      currentFilter = status;
-      
-      document.getElementById('filterPending').classList.remove('active');
-      document.getElementById('filterAccepted').classList.remove('active');
-      document.getElementById('filterClosed').classList.remove('active');
-
-      if (status === 'pending') document.getElementById('filterPending').classList.add('active');
-      if (status === 'accepted') document.getElementById('filterAccepted').classList.add('active');
-      if (status === 'closed') document.getElementById('filterClosed').classList.add('active');
-
-      loadPendingReferrals();
+    function setAgentFilter(status) {
+      agentFilter = status;
+      document.querySelectorAll('#tabAgent .pipeline-btn').forEach(b => b.classList.remove('active'));
+      if (status === 'pending') document.getElementById('agentFilterPending').classList.add('active');
+      if (status === 'accepted') document.getElementById('agentFilterAccepted').classList.add('active');
+      if (status === 'pending_broker_approval') document.getElementById('agentFilterApproval').classList.add('active');
+      if (status === 'closed') document.getElementById('agentFilterClosed').classList.add('active');
+      loadAgentQueue();
     }
 
     function toggleAuthMode() {
@@ -239,7 +251,6 @@
       document.getElementById('authSubtitle').innerText = isSignUpMode ? "Create your account to start earning points" : "Log in to view your points ledger";
       document.getElementById('mainAuthBtn').innerText = isSignUpMode ? "Create Account" : "Log In";
       document.getElementById('authToggleLink').innerText = isSignUpMode ? "Already have an account? Log In" : "Need an account? Sign Up";
-      document.getElementById('statusMessage').innerText = "";
     }
 
     async function handleAuthAction() {
@@ -257,25 +268,12 @@
       msgDiv.innerText = "Processing...";
 
       if (isSignUpMode) {
-        const { error } = await supabaseClient.auth.signUp({ 
-          email, 
-          password,
-          options: { emailRedirectTo: window.location.origin + window.location.pathname }
-        });
-        
-        if (error) { 
-          msgDiv.style.color = '#ef4444'; 
-          msgDiv.innerText = error.message; 
-        } else { 
-          msgDiv.style.color = '#10b981'; 
-          msgDiv.innerText = "Account initiated! Please check your inbox for a verification email link."; 
-        }
+        const { error } = await supabaseClient.auth.signUp({ email, password });
+        if (error) { msgDiv.style.color = '#ef4444'; msgDiv.innerText = error.message; }
+        else { msgDiv.style.color = '#10b981'; msgDiv.innerText = "Check your email for confirmation!"; }
       } else {
         const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
-        if (error) { 
-          msgDiv.style.color = '#ef4444'; 
-          msgDiv.innerText = error.message; 
-        }
+        if (error) { msgDiv.style.color = '#ef4444'; msgDiv.innerText = error.message; }
       }
     }
 
@@ -284,165 +282,143 @@
       document.getElementById('appInterface').classList.remove('hidden');
       document.getElementById('clientNameHeader').innerText = currentUser.email;
 
-      if (currentUser.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
-        document.getElementById('navAdmin').classList.remove('hidden');
-        loadPendingReferrals();
-      } else {
-        document.getElementById('navAdmin').classList.add('hidden');
-      }
-
-      const { data: clientProfile } = await supabaseClient
+      // Check User Role from Database
+      const { data: profile } = await supabaseClient
         .from('clients')
-        .select('total_points, current_tier')
+        .select('total_points, current_tier, role')
         .eq('id', currentUser.id)
         .single();
 
-      if (clientProfile) {
-        document.getElementById('pointsVal').innerText = clientProfile.total_points || 0;
+      userRole = profile?.role || 'client';
+
+      // Dynamically display tabs based on 3-tier hierarchy
+      if (userRole === 'agent') {
+        document.getElementById('navAgent').classList.remove('hidden');
+        document.getElementById('navBroker').classList.add('hidden');
+      } else if (userRole === 'broker') {
+        document.getElementById('navAgent').classList.remove('hidden');
+        document.getElementById('navBroker').classList.remove('hidden');
+      } else {
+        // Standard Clients do NOT see any Agent or Broker portal tabs
+        document.getElementById('navAgent').classList.add('hidden');
+        document.getElementById('navBroker').classList.add('hidden');
+      }
+
+      if (profile) {
+        document.getElementById('pointsVal').innerText = profile.total_points || 0;
         const badge = document.getElementById('tierBadge');
-        badge.innerText = `${clientProfile.current_tier || 'Bronze'} Member`;
-        badge.className = `tier-badge tier-${clientProfile.current_tier || 'Bronze'}`;
+        badge.innerText = `${profile.current_tier || 'Bronze'} Member`;
+        badge.className = `tier-badge tier-${profile.current_tier || 'Bronze'}`;
       }
     }
 
-    // UPDATED PIPELINE QUEUE: Graceful query with fallback error handling
-    async function loadPendingReferrals() {
-      const queueContainer = document.getElementById('adminReferralsQueue');
-      queueContainer.innerHTML = `<p style="font-size:0.8rem; color:#888; margin-top:15px; text-align:center;">Loading ${currentFilter} records...</p>`;
+    // AGENT VIEW QUEUE
+    async function loadAgentQueue() {
+      const container = document.getElementById('agentQueue');
+      container.innerHTML = `<p style="font-size:0.8rem; color:#888; margin-top:15px; text-align:center;">Loading records...</p>`;
 
-      let { data: referrals, error } = await supabaseClient
+      let { data: referrals } = await supabaseClient
         .from('referrals')
-        .select(`
-          *,
-          clients (
-            email,
-            full_name,
-            phone
-          )
-        `)
-        .eq('status', currentFilter);
+        .select(`*, clients (email, full_name, phone)`)
+        .eq('status', agentFilter);
 
-      // Fallback query if relational join fails
-      if (error) {
-        console.warn("Relational query failed, falling back to direct referrals query:", error.message);
-        const fallback = await supabaseClient
-          .from('referrals')
-          .select('*')
-          .eq('status', currentFilter);
-        referrals = fallback.data;
-        error = fallback.error;
-      }
-
-      if (error || !referrals || referrals.length === 0) {
-        queueContainer.innerHTML = `<p style="font-size:0.85rem; color:#6b7280; margin-top:20px; text-align:center;">No ${currentFilter} referrals found.</p>`;
+      if (!referrals || referrals.length === 0) {
+        container.innerHTML = `<p style="font-size:0.85rem; color:#6b7280; margin-top:20px; text-align:center;">No ${agentFilter} referrals.</p>`;
         return;
       }
 
-      queueContainer.innerHTML = "";
+      container.innerHTML = "";
       referrals.forEach(ref => {
-        let badgeColor = '#fee2e2';
-        let badgeTextColor = '#991b1b';
-
-        if (ref.status === 'accepted') {
-          badgeColor = '#dbeafe';
-          badgeTextColor = '#1e40af';
-        } else if (ref.status === 'closed') {
-          badgeColor = '#d1fae5';
-          badgeTextColor = '#065f46';
-        }
-
         const refFullName = `${ref.ref_first_name || ''} ${ref.ref_last_name || ''}`.trim() || 'Unspecified Lead';
-        const clientEmail = ref.clients?.email || ref.referrer_client_id || 'N/A';
-        const clientName = ref.clients?.full_name || 'Registered Customer';
-        const clientPhone = ref.clients?.phone || 'No phone recorded';
-
-        queueContainer.innerHTML += `
-          <div class="referral-item" id="ref-card-${ref.id}">
+        container.innerHTML += `
+          <div class="referral-item">
             <div class="referral-header">
               <span>🏡 Lead: ${refFullName}</span>
-              <span style="font-size:0.72rem; font-weight:bold; background: ${badgeColor}; color: ${badgeTextColor}; padding:3px 8px; border-radius:4px;">
+              <span style="font-size:0.7rem; font-weight:bold; background:#dbeafe; color:#1e40af; padding:3px 6px; border-radius:4px;">
                 ${ref.status.toUpperCase()}
               </span>
             </div>
-            
-            <div style="font-size:0.82rem; color:#475569; margin-top: 4px;">
-              <strong>Lead Email:</strong> ${ref.ref_email || 'N/A'}<br>
-              <strong>Lead Phone:</strong> ${ref.ref_phone || 'N/A'}
+            <div style="font-size:0.8rem; color:#475569;">
+              Lead Email: ${ref.ref_email || 'N/A'} | Phone: ${ref.ref_phone || 'N/A'}
             </div>
-
             <div class="client-info-box">
-              <strong>Referred By Customer:</strong><br>
-              👤 ${clientName}<br>
-              ✉️ ${clientEmail}<br>
-              📞 ${clientPhone}
+              <strong>Submitted By Customer:</strong> ${ref.clients?.email || ref.referrer_client_id}
             </div>
-            
             <div class="action-btn-row">
-              ${ref.status === 'pending' ? 
-                `<button class="btn-accept" onclick="acceptReferral(${ref.id})">Accept Lead ✓</button>` : ''
-              }
-              ${ref.status === 'accepted' ? 
-                `<button class="btn-close" onclick="closeTransaction(${ref.id}, '${ref.referrer_client_id}')">Mark Closed & Award 500 Pts 💰</button>` : ''
-              }
-              ${ref.status === 'closed' ? 
-                `<div style="font-size:0.75rem; color:#10b981; font-weight:bold; margin-top:4px;">✅ Transaction Settled & Awarded</div>` : ''
-              }
+              ${ref.status === 'pending' ? `<button class="btn-accept" onclick="agentAcceptLead(${ref.id})">Accept Lead ✓</button>` : ''}
+              ${ref.status === 'accepted' ? `<button class="btn-request" onclick="agentRequestApproval(${ref.id})">Submit to Broker for Points Approval 📤</button>` : ''}
+              ${ref.status === 'pending_broker_approval' ? `<div style="font-size:0.75rem; color:#d97706; font-weight:bold;">⏳ Pending Broker Approval</div>` : ''}
+              ${ref.status === 'closed' ? `<div style="font-size:0.75rem; color:#10b981; font-weight:bold;">✅ Closed & Points Awarded</div>` : ''}
             </div>
           </div>
         `;
       });
     }
 
-    async function acceptReferral(referralId) {
-      const { error } = await supabaseClient
-        .from('referrals')
-        .update({ status: 'accepted' })
-        .eq('id', referralId);
+    // BROKER VIEW QUEUE
+    async function loadBrokerQueue() {
+      const container = document.getElementById('brokerQueue');
+      container.innerHTML = `<p style="font-size:0.8rem; color:#888; margin-top:15px; text-align:center;">Checking pending approvals...</p>`;
 
-      if (error) {
-        alert("Error accepting lead: " + error.message);
-      } else {
-        alert("Referral lead accepted! Moved to 'Accepted' tab.");
-        loadPendingReferrals();
+      let { data: referrals } = await supabaseClient
+        .from('referrals')
+        .select(`*, clients (email, full_name, phone)`)
+        .eq('status', 'pending_broker_approval');
+
+      if (!referrals || referrals.length === 0) {
+        container.innerHTML = `<p style="font-size:0.85rem; color:#10b981; font-weight:bold; margin-top:20px; text-align:center;">✅ All caught up! No pending point approvals.</p>`;
+        return;
       }
+
+      container.innerHTML = "";
+      referrals.forEach(ref => {
+        const refFullName = `${ref.ref_first_name || ''} ${ref.ref_last_name || ''}`.trim() || 'Unspecified Lead';
+        container.innerHTML += `
+          <div class="referral-item" style="border-left: 4px solid #d97706;">
+            <div class="referral-header">
+              <span>🏡 Closing Lead: ${refFullName}</span>
+              <span style="font-size:0.7rem; font-weight:bold; background:#fef3c7; color:#92400e; padding:3px 6px; border-radius:4px;">NEEDS APPROVAL</span>
+            </div>
+            <div class="client-info-box">
+              <strong>Award Points To Client:</strong> ${ref.clients?.email || ref.referrer_client_id}
+            </div>
+            <button class="btn-approve" onclick="brokerApproveAndAward(${ref.id}, '${ref.referrer_client_id}')">Approve & Disburse 500 Points 💰</button>
+          </div>
+        `;
+      });
     }
 
-    async function closeTransaction(referralId, clientUuid) {
-      const { data: profile } = await supabaseClient
-        .from('clients')
-        .select('total_points')
-        .eq('id', clientUuid)
-        .single();
+    // WORKFLOW ACTIONS
+    async function agentAcceptLead(id) {
+      await supabaseClient.from('referrals').update({ status: 'accepted' }).eq('id', id);
+      alert("Lead accepted into active pipeline!");
+      loadAgentQueue();
+    }
 
+    async function agentRequestApproval(id) {
+      await supabaseClient.from('referrals').update({ status: 'pending_broker_approval' }).eq('id', id);
+      alert("Transaction submitted to Broker for points disburse approval!");
+      loadAgentQueue();
+    }
+
+    async function brokerApproveAndAward(referralId, clientUuid) {
+      // 1. Fetch Client Profile
+      const { data: profile } = await supabaseClient.from('clients').select('total_points').eq('id', clientUuid).single();
       const newPointsTotal = (profile?.total_points || 0) + 500;
 
-      await supabaseClient
-        .from('clients')
-        .update({ total_points: newPointsTotal })
-        .eq('id', clientUuid);
+      // 2. Award Points & Close Referral
+      await supabaseClient.from('clients').update({ total_points: newPointsTotal }).eq('id', clientUuid);
+      await supabaseClient.from('referrals').update({ status: 'closed' }).eq('id', referralId);
 
-      await supabaseClient
-        .from('referrals')
-        .update({ status: 'closed' })
-        .eq('id', referralId);
+      // 3. Log History
+      await supabaseClient.from('points_ledger').insert([
+        { client_id: clientUuid, amount: 500, action_type: 'referral_bonus', description: 'Broker approved referral closing points' }
+      ]);
 
-      await supabaseClient
-        .from('points_ledger')
-        .insert([
-          { client_id: clientUuid, amount: 500, action_type: 'referral_bonus', description: 'Closed home purchase transaction payout settlement' }
-        ]);
-
-      alert("Transaction closed! 500 points awarded to client.");
-      loadPendingReferrals();
-      showDashboard();
+      alert("Broker Approval Confirmed! 500 points dispatched to client wallet.");
+      loadBrokerQueue();
     }
 
-    function showAuth() {
-      document.getElementById('appInterface').classList.add('hidden');
-      document.getElementById('authContainer').classList.remove('hidden');
-    }
-
-    // SUBMISSION HANDLER: Captures First Name, Last Name, Email, and Phone
     async function submitReferral() {
       const firstName = document.getElementById('refFirstName').value;
       const lastName = document.getElementById('refLastName').value;
@@ -452,27 +428,19 @@
 
       if(!firstName || !email) {
         refMsg.style.color = '#ef4444';
-        refMsg.innerText = "Please provide at least a First Name and Email.";
+        refMsg.innerText = "Provide at least First Name and Email.";
         return;
       }
 
-      refMsg.style.color = '#374151';
-      refMsg.innerText = "Submitting referral...";
+      refMsg.innerText = "Submitting...";
 
       const { error } = await supabaseClient.from('referrals').insert([
-        { 
-          referrer_client_id: currentUser.id, 
-          ref_first_name: firstName,
-          ref_last_name: lastName,
-          ref_email: email,
-          ref_phone: phone
-        }
+        { referrer_client_id: currentUser.id, ref_first_name: firstName, ref_last_name: lastName, ref_email: email, ref_phone: phone }
       ]);
 
       if(error) {
-        console.error("Supabase Error Details:", error);
         refMsg.style.color = '#ef4444';
-        refMsg.innerText = `Error saving referral: ${error.message}`;
+        refMsg.innerText = error.message;
       } else {
         refMsg.style.color = '#10b981';
         refMsg.innerText = "Referral submitted successfully! 👍";
@@ -480,19 +448,16 @@
         document.getElementById('refLastName').value = "";
         document.getElementById('refEmail').value = "";
         document.getElementById('refPhone').value = "";
-        
-        if (currentUser.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
-          loadPendingReferrals();
-        }
       }
+    }
+
+    function showAuth() {
+      document.getElementById('appInterface').classList.add('hidden');
+      document.getElementById('authContainer').classList.remove('hidden');
     }
 
     async function handleLogout() {
       await supabaseClient.auth.signOut();
-    }
-
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js'); });
     }
   </script>
 </body>
