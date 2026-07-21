@@ -348,7 +348,7 @@
           ref_phone,
           status,
           referrer_client_id,
-          clients:referrer_client_id (
+          clients:referrer_client_id!fk_referrals_clients (
             full_name,
             email
           )
@@ -443,7 +443,7 @@
           ref_phone,
           status,
           referrer_client_id,
-          clients:referrer_client_id (
+          clients:referrer_client_id!fk_referrals_clients (
             full_name,
             email
           )
