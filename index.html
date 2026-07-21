@@ -7,7 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="bg-slate-100 min-h-screen flex flex-col items-center justify-between font-sans">
+<body class="bg-slate-100 min-h-screen flex flex-col items-center justify-between font-sans pb-20">
 
   <!-- MAIN CONTAINER -->
   <main class="w-full max-w-md p-4 flex-1 flex flex-col justify-center">
@@ -108,9 +108,14 @@
       </section>
 
       <!-- TAB 4: BROKERAGE MANAGEMENT -->
-      <section id="tab-broker" class="tab-content hidden bg-white rounded-2xl shadow-sm p-6 border border-slate-200">
-        <h3 class="text-xl font-bold text-blue-900 mb-4 text-center">Brokerage Management</h3>
-        <form id="provision-agent-form" onsubmit="handleProvisionAgent(event)" class="space-y-3">
+      <section id="tab-broker" class="tab-content hidden bg-white rounded-2xl shadow-sm p-6 border border-slate-200 space-y-6">
+        <div class="text-center">
+          <h3 class="text-xl font-bold text-blue-900">Brokerage Management</h3>
+          <p class="text-xs text-slate-500">System Administration & Audit</p>
+        </div>
+
+        <!-- Agent Registration -->
+        <form id="provision-agent-form" onsubmit="handleProvisionAgent(event)" class="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
           <h4 class="font-bold text-slate-800 text-sm">Register New Agent</h4>
           <input type="text" id="agent-name" placeholder="Agent Full Name" required class="w-full px-3 py-2 border rounded-lg text-sm">
           <input type="email" id="agent-email" placeholder="Agent Email" required class="w-full px-3 py-2 border rounded-lg text-sm">
@@ -118,6 +123,16 @@
             Provision Agent Account
           </button>
         </form>
+
+        <!-- Broker Audit: Rejected / Closed Leads -->
+        <div class="space-y-3">
+          <h4 class="font-bold text-slate-800 text-sm flex items-center gap-1.5">
+            <span>🚫</span> Rejected & Closed Leads
+          </h4>
+          <div id="broker-rejected-leads-container" class="space-y-3">
+            <!-- Rendered dynamically for Broker -->
+          </div>
+        </div>
       </section>
 
     </div>
@@ -201,7 +216,6 @@
       const agentNav = document.getElementById('nav-agent-btn');
       const brokerNav = document.getElementById('nav-broker-btn');
 
-      // Visibility conditions
       if (currentUserRole === 'agent') {
         agentNav.classList.remove('hidden');
         brokerNav.classList.add('hidden');
@@ -268,15 +282,18 @@
 
       if (tabId === 'tab-agent') {
         loadAgentPortalLeads();
+      } else if (tabId === 'tab-broker') {
+        loadBrokerRejectedLeads();
       }
     }
 
-    // LOAD AGENT LEADS WITH SUBMITTED BY DETAILS
+    // LOAD AGENT LEADS (EXCLUDES REJECTED LEADS FOR AGENTS)
     async function loadAgentPortalLeads() {
       const container = document.getElementById('agent-leads-container');
-      container.innerHTML = `<p class="text-slate-400 text-center py-4">Loading leads...</p>`;
+      container.innerHTML = `<p class="text-slate-400 text-center py-4 text-xs">Loading active leads...</p>`;
 
-      const { data: referrals, error } = await supabase
+      // Exclude REJECTED leads when fetching for the Agent Portal
+      let query = supabase
         .from('referrals')
         .select(`
           id,
@@ -292,20 +309,27 @@
           )
         `);
 
+      // Filter out REJECTED leads if user is an agent
+      if (currentUserRole === 'agent') {
+        query = query.neq('status', 'REJECTED');
+      }
+
+      const { data: referrals, error } = await query;
+
       if (error) {
         container.innerHTML = `<p class="text-red-500 text-xs text-center">Error: ${error.message}</p>`;
         return;
       }
 
       if (!referrals || referrals.length === 0) {
-        container.innerHTML = `<p class="text-slate-400 text-center py-4 text-sm">No referrals found.</p>`;
+        container.innerHTML = `<p class="text-slate-400 text-center py-4 text-sm">No active referrals found.</p>`;
         return;
       }
 
       container.innerHTML = referrals.map(ref => {
-        // Fallback checks for missing client records
         const referrerName = ref.clients?.full_name || 'Customer';
         const referrerEmail = ref.clients?.email || 'N/A';
+        const isPending = (ref.status || 'PENDING') === 'PENDING';
 
         return `
           <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
@@ -317,26 +341,100 @@
             </div>
             <p class="text-xs text-slate-500 mb-3">Email: ${ref.email} | Phone: ${ref.phone}</p>
             
-            <!-- UPDATED SUBMITTED BY BANNER -->
             <div class="p-3 bg-blue-50/80 rounded-lg border-l-4 border-blue-600 mb-3">
               <p class="text-xs text-slate-700">
                 <span class="font-bold">Submitted By:</span> ${referrerName} (${referrerEmail})
               </p>
             </div>
 
-            ${ref.status === 'PENDING' ? `
-              <button onclick="acceptLead('${ref.id}')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg text-xs transition-colors">
-                Accept Lead ✓
-              </button>
+            ${isPending ? `
+              <div class="grid grid-cols-2 gap-2 mt-2">
+                <button onclick="acceptLead('${ref.id}')" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg text-xs transition-colors">
+                  Accept Lead ✓
+                </button>
+                <button onclick="rejectLead('${ref.id}')" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 rounded-lg text-xs transition-colors">
+                  Reject Lead ✕
+                </button>
+              </div>
             ` : ''}
           </div>
         `;
       }).join('');
     }
 
+    // ACCEPT LEAD ACTION
     async function acceptLead(id) {
       await supabase.from('referrals').update({ status: 'ACCEPTED' }).eq('id', id);
       loadAgentPortalLeads();
+    }
+
+    // REJECT LEAD ACTION (FLAGS AS REJECTED / CLOSED)
+    async function rejectLead(id) {
+      const { error } = await supabase
+        .from('referrals')
+        .update({ status: 'REJECTED' })
+        .eq('id', id);
+
+      if (error) {
+        alert("Error rejecting lead: " + error.message);
+      } else {
+        loadAgentPortalLeads();
+      }
+    }
+
+    // LOAD REJECTED / CLOSED LEADS (BROKER EXCLUSIVE VIEW)
+    async function loadBrokerRejectedLeads() {
+      const container = document.getElementById('broker-rejected-leads-container');
+      if (!container) return;
+
+      container.innerHTML = `<p class="text-slate-400 text-center py-2 text-xs">Loading audit data...</p>`;
+
+      const { data: referrals, error } = await supabase
+        .from('referrals')
+        .select(`
+          id,
+          first_name,
+          last_name,
+          email,
+          phone,
+          status,
+          client_id,
+          clients:client_id (
+            full_name,
+            email
+          )
+        `)
+        .eq('status', 'REJECTED');
+
+      if (error) {
+        container.innerHTML = `<p class="text-red-500 text-xs text-center">Error: ${error.message}</p>`;
+        return;
+      }
+
+      if (!referrals || referrals.length === 0) {
+        container.innerHTML = `<p class="text-slate-400 text-center py-2 text-xs">No rejected leads found.</p>`;
+        return;
+      }
+
+      container.innerHTML = referrals.map(ref => {
+        const referrerName = ref.clients?.full_name || 'Customer';
+        const referrerEmail = ref.clients?.email || 'N/A';
+
+        return `
+          <div class="bg-red-50/50 border border-red-200 rounded-xl p-3 shadow-sm">
+            <div class="flex justify-between items-center mb-1">
+              <h5 class="text-sm font-bold text-slate-800">🏠 ${ref.first_name} ${ref.last_name}</h5>
+              <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-red-600 text-white uppercase tracking-wider">
+                CLOSED / REJECTED
+              </span>
+            </div>
+            <p class="text-xs text-slate-500 mb-2">Email: ${ref.email} | Phone: ${ref.phone}</p>
+            <p class="text-xs text-slate-600">
+              <span class="font-semibold">Submitted By:</span> ${referrerName} (${referrerEmail})
+            </p>
+          </div>
+        `;
+      }).join('');
     }
   </script>
 </body>
