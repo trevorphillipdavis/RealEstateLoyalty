@@ -7,7 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="bg-slate-100 min-h-screen flex flex-col items-center justify-between font-sans pb-20">
+<body class="bg-slate-100 min-h-screen flex flex-col items-center justify-between font-sans pb-24">
 
   <!-- MAIN CONTAINER -->
   <main class="w-full max-w-md p-4 flex-1 flex flex-col justify-center">
@@ -16,7 +16,7 @@
     <div id="auth-card" class="bg-white rounded-2xl shadow-xl p-6 border border-slate-200">
       <div class="text-center mb-6">
         <h1 class="text-2xl font-bold text-blue-900" id="auth-title">Brokerage Rewards</h1>
-        <p class="text-slate-500 text-sm mt-1" id="auth-subtitle">Log in to view your points ledger</p>
+        <p class="text-slate-500 text-sm mt-1" id="auth-subtitle">Log in to view your account</p>
       </div>
 
       <form id="auth-form" class="space-y-4" onsubmit="handleAuth(event)">
@@ -53,13 +53,18 @@
     <div id="app-content" class="hidden w-full space-y-4">
 
       <!-- HEADER CARD -->
-      <div class="bg-white rounded-2xl shadow-sm p-4 border border-slate-200 text-center">
-        <h2 class="text-xl font-bold text-blue-900" id="welcome-header">Welcome Back!</h2>
-        <p class="text-xs text-slate-500" id="user-email-display"></p>
+      <div class="bg-white rounded-2xl shadow-sm p-4 border border-slate-200 flex justify-between items-center">
+        <div>
+          <h2 class="text-lg font-bold text-blue-900" id="welcome-header">Welcome Back!</h2>
+          <p class="text-xs text-slate-500" id="user-email-display"></p>
+        </div>
+        <button onclick="handleLogout()" class="text-xs bg-red-50 text-red-600 border border-red-200 px-3 py-1.5 rounded-lg hover:bg-red-100 font-semibold">
+          Log Out
+        </button>
       </div>
 
-      <!-- TAB 1: REWARDS (CLIENT) -->
-      <section id="tab-rewards" class="tab-content bg-white rounded-2xl shadow-sm p-6 border border-slate-200 space-y-4">
+      <!-- TAB 1: REWARDS (CLIENT ONLY) -->
+      <section id="tab-rewards" class="tab-content hidden bg-white rounded-2xl shadow-sm p-6 border border-slate-200 space-y-4">
         <div class="border-2 border-dashed border-blue-300 rounded-xl p-4 text-center bg-blue-50/50">
           <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Current Balance</p>
           <p class="text-4xl font-extrabold text-blue-900 my-1" id="points-balance">0</p>
@@ -84,10 +89,6 @@
             Submit Referral
           </button>
         </form>
-
-        <button onclick="handleLogout()" class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-2.5 rounded-lg text-sm transition-colors">
-          Log Out
-        </button>
       </section>
 
       <!-- TAB 2: BROWSE HOMES -->
@@ -97,32 +98,53 @@
       </section>
 
       <!-- TAB 3: AGENT PORTAL -->
-      <section id="tab-agent" class="tab-content hidden bg-white rounded-2xl shadow-sm p-6 border border-slate-200">
-        <div class="text-center mb-4">
+      <section id="tab-agent" class="tab-content hidden bg-white rounded-2xl shadow-sm p-6 border border-slate-200 space-y-4">
+        <div class="text-center">
           <h3 class="text-xl font-bold text-blue-900">Agent Portal</h3>
           <p class="text-xs text-slate-500">Assigned Referral Pipeline</p>
         </div>
-        <div id="agent-leads-container" class="space-y-4">
-          <!-- Lead cards rendered dynamically -->
+
+        <!-- AGENT PORTAL SUB-TABS -->
+        <div class="flex border-b border-slate-200 text-xs font-bold text-center">
+          <button id="agent-subtab-btn-leads" onclick="switchAgentSubTab('leads')" class="flex-1 py-2 border-b-2 border-blue-600 text-blue-600">
+            Leads
+          </button>
+          <button id="agent-subtab-btn-active" onclick="switchAgentSubTab('active')" class="flex-1 py-2 text-slate-400 hover:text-slate-600">
+            Active
+          </button>
+          <button id="agent-subtab-btn-won" onclick="switchAgentSubTab('won')" class="flex-1 py-2 text-slate-400 hover:text-slate-600">
+            Closed/Won
+          </button>
+          <button id="agent-subtab-btn-lost" onclick="switchAgentSubTab('lost')" class="flex-1 py-2 text-slate-400 hover:text-slate-600">
+            Closed/Lost
+          </button>
         </div>
+
+        <!-- AGENT SUB-TAB CONTENT CONTAINERS -->
+        <div id="agent-subtab-leads" class="agent-subtab-content space-y-3"></div>
+        <div id="agent-subtab-active" class="agent-subtab-content hidden space-y-3"></div>
+        <div id="agent-subtab-won" class="agent-subtab-content hidden space-y-3"></div>
+        <div id="agent-subtab-lost" class="agent-subtab-content hidden space-y-3"></div>
       </section>
 
       <!-- TAB 4: BROKERAGE MANAGEMENT -->
       <section id="tab-broker" class="tab-content hidden bg-white rounded-2xl shadow-sm p-6 border border-slate-200 space-y-6">
         <div class="text-center">
           <h3 class="text-xl font-bold text-blue-900">Brokerage Management</h3>
-          <p class="text-xs text-slate-500">System Administration & Audit</p>
+          <p class="text-xs text-slate-500">Approvals & Audit</p>
         </div>
 
-        <!-- Agent Registration -->
-        <form id="provision-agent-form" onsubmit="handleProvisionAgent(event)" class="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
-          <h4 class="font-bold text-slate-800 text-sm">Register New Agent</h4>
-          <input type="text" id="agent-name" placeholder="Agent Full Name" required class="w-full px-3 py-2 border rounded-lg text-sm">
-          <input type="email" id="agent-email" placeholder="Agent Email" required class="w-full px-3 py-2 border rounded-lg text-sm">
-          <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-lg text-sm">
-            Provision Agent Account
-          </button>
-        </form>
+        <!-- BROKER APPROVAL SECTION FOR POINTS -->
+        <div class="space-y-3">
+          <h4 class="font-bold text-slate-800 text-sm flex items-center gap-1.5">
+            <span>💎</span> Pending Points Approvals
+          </h4>
+          <div id="broker-pending-approvals-container" class="space-y-3">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <hr class="border-slate-100" />
 
         <!-- Broker Audit: Rejected / Closed Leads -->
         <div class="space-y-3">
@@ -141,11 +163,11 @@
   <!-- BOTTOM NAVIGATION BAR -->
   <nav id="bottom-nav" class="hidden w-full bg-white border-t border-slate-200 fixed bottom-0 left-0 right-0 py-2 px-4 shadow-lg">
     <div class="max-w-md mx-auto flex justify-around items-center" id="nav-tabs-container">
-      <button onclick="switchTab('tab-rewards')" class="nav-btn text-blue-600 flex flex-col items-center">
+      <button id="nav-rewards-btn" onclick="switchTab('tab-rewards')" class="nav-btn text-blue-600 flex flex-col items-center">
         <span class="text-lg">💎</span>
         <span class="text-[10px] font-semibold">My Rewards</span>
       </button>
-      <button onclick="switchTab('tab-homes')" class="nav-btn text-slate-400 flex flex-col items-center">
+      <button id="nav-homes-btn" onclick="switchTab('tab-homes')" class="nav-btn text-slate-400 flex flex-col items-center">
         <span class="text-lg">🏠</span>
         <span class="text-[10px] font-semibold">Browse Homes</span>
       </button>
@@ -171,6 +193,7 @@
     let isSignUp = false;
     let currentUser = null;
     let currentUserRole = 'client';
+    let currentAgentSubTab = 'leads';
 
     // AUTH STATE LISTENER
     supabaseClient.auth.onAuthStateChange(async (event, session) => {
@@ -214,21 +237,26 @@
 
       document.getElementById('user-email-display').innerText = currentUser.email;
 
+      const rewardsNav = document.getElementById('nav-rewards-btn');
       const agentNav = document.getElementById('nav-agent-btn');
       const brokerNav = document.getElementById('nav-broker-btn');
 
       if (currentUserRole === 'agent') {
+        rewardsNav.classList.add('hidden'); // AGENTS DO NOT SEE REWARDS/POINTS
         agentNav.classList.remove('hidden');
         brokerNav.classList.add('hidden');
+        switchTab('tab-agent'); // DEFAULT AGENT SCREEN IS AGENT PORTAL
       } else if (currentUserRole === 'broker') {
+        rewardsNav.classList.remove('hidden');
         agentNav.classList.remove('hidden');
         brokerNav.classList.remove('hidden');
+        switchTab('tab-rewards');
       } else {
+        rewardsNav.classList.remove('hidden');
         agentNav.classList.add('hidden');
         brokerNav.classList.add('hidden');
+        switchTab('tab-rewards');
       }
-
-      switchTab('tab-rewards');
     }
 
     function renderAuthUI() {
@@ -240,7 +268,7 @@
     function toggleAuthMode() {
       isSignUp = !isSignUp;
       document.getElementById('auth-title').innerText = isSignUp ? 'Create Account' : 'Brokerage Rewards';
-      document.getElementById('auth-subtitle').innerText = isSignUp ? 'Sign up to start earning rewards' : 'Log in to view your points ledger';
+      document.getElementById('auth-subtitle').innerText = isSignUp ? 'Sign up to start earning rewards' : 'Log in to view your account';
       document.getElementById('name-field-group').classList.toggle('hidden', !isSignUp);
       document.getElementById('auth-submit-btn').innerText = isSignUp ? 'Sign Up' : 'Log In';
       document.getElementById('auth-toggle-btn').innerText = isSignUp ? 'Already have an account? Log In' : 'Need an account? Sign Up';
@@ -282,10 +310,25 @@
       document.getElementById(tabId).classList.remove('hidden');
 
       if (tabId === 'tab-agent') {
-        loadAgentPortalLeads();
+        loadAgentPortalData();
       } else if (tabId === 'tab-broker') {
-        loadBrokerRejectedLeads();
+        loadBrokerData();
       }
+    }
+
+    function switchAgentSubTab(subTab) {
+      currentAgentSubTab = subTab;
+      document.querySelectorAll('.agent-subtab-content').forEach(el => el.classList.add('hidden'));
+      document.getElementById(`agent-subtab-${subTab}`).classList.remove('hidden');
+
+      ['leads', 'active', 'won', 'lost'].forEach(t => {
+        const btn = document.getElementById(`agent-subtab-btn-${t}`);
+        if (t === subTab) {
+          btn.className = "flex-1 py-2 border-b-2 border-blue-600 text-blue-600 font-bold";
+        } else {
+          btn.className = "flex-1 py-2 text-slate-400 hover:text-slate-600 font-bold";
+        }
+      });
     }
 
     // SUBMIT REFERRAL
@@ -313,32 +356,12 @@
       }
     }
 
-    // PROVISION AGENT (BROKER ONLY)
-    async function handleProvisionAgent(e) {
-      e.preventDefault();
-      const name = document.getElementById('agent-name').value;
-      const email = document.getElementById('agent-email').value;
-
-      const { error } = await supabaseClient.from('clients').insert([{
-        full_name: name,
-        email: email,
-        role: 'agent'
-      }]);
-
-      if (error) {
-        alert("Error provisioning agent: " + error.message);
-      } else {
-        alert(`Agent profile for ${name} created. You can now configure their password in Supabase Auth.`);
-        document.getElementById('provision-agent-form').reset();
-      }
-    }
-
-    // HELPER: FETCH CLIENT MAP FOR MANUALLY JOINING REFERRERS
+    // HELPER: FETCH CLIENT MAP FOR REFERRER DETAILS
     async function fetchClientsMap(clientIds) {
       if (!clientIds || clientIds.length === 0) return {};
       const { data } = await supabaseClient
         .from('clients')
-        .select('id, full_name, email, role')
+        .select('id, full_name, email, role, points')
         .in('id', clientIds);
 
       const map = {};
@@ -348,120 +371,151 @@
       return map;
     }
 
-    // HELPER: GET CLEAN DISPLAY NAME OR FALLBACK TO ROLE
     function getReferrerDisplayName(client) {
-      if (client?.full_name && client.full_name.trim() !== '') {
-        return client.full_name;
-      }
-      // If full_name is empty, display their assigned role (e.g. "Agent", "Broker", or "Client")
-      if (client?.role) {
-        return client.role.charAt(0).toUpperCase() + client.role.slice(1);
-      }
+      if (client?.full_name && client.full_name.trim() !== '') return client.full_name;
+      if (client?.role) return client.role.charAt(0).toUpperCase() + client.role.slice(1);
       return 'Agent';
     }
 
-    // LOAD AGENT LEADS
-    async function loadAgentPortalLeads() {
-      const container = document.getElementById('agent-leads-container');
-      container.innerHTML = `<p class="text-slate-400 text-center py-4 text-xs">Loading active leads...</p>`;
-
-      let query = supabaseClient.from('referrals').select('*');
-
-      if (currentUserRole === 'agent') {
-        query = query.neq('status', 'REJECTED');
-      }
-
-      const { data: referrals, error } = await query;
+    // LOAD AGENT PORTAL PIPELINE (4 SUB-TABS)
+    async function loadAgentPortalData() {
+      const { data: referrals, error } = await supabaseClient.from('referrals').select('*');
 
       if (error) {
-        container.innerHTML = `<p class="text-red-500 text-xs text-center">Error: ${error.message}</p>`;
+        console.error("Error loading agent portal:", error);
         return;
       }
 
-      if (!referrals || referrals.length === 0) {
-        container.innerHTML = `<p class="text-slate-400 text-center py-4 text-sm">No active referrals found.</p>`;
-        return;
-      }
-
-      const clientIds = [...new Set(referrals.map(r => r.referrer_client_id).filter(Boolean))];
+      const clientIds = [...new Set((referrals || []).map(r => r.referrer_client_id).filter(Boolean))];
       const clientsMap = await fetchClientsMap(clientIds);
 
-      container.innerHTML = referrals.map(ref => {
+      // Categorize referrals
+      const leads = (referrals || []).filter(r => (r.status || 'PENDING') === 'PENDING');
+      const active = (referrals || []).filter(r => r.status === 'ACCEPTED');
+      const won = (referrals || []).filter(r => r.status === 'CLOSED_WON' || r.status === 'PENDING_BROKER_APPROVAL');
+      const lost = (referrals || []).filter(r => r.status === 'REJECTED' || r.status === 'CLOSED_LOST');
+
+      // Render Containers
+      renderAgentSubTabContent('agent-subtab-leads', leads, clientsMap, 'leads');
+      renderAgentSubTabContent('agent-subtab-active', active, clientsMap, 'active');
+      renderAgentSubTabContent('agent-subtab-won', won, clientsMap, 'won');
+      renderAgentSubTabContent('agent-subtab-lost', lost, clientsMap, 'lost');
+    }
+
+    function renderAgentSubTabContent(containerId, list, clientsMap, subTabType) {
+      const container = document.getElementById(containerId);
+      if (!list || list.length === 0) {
+        container.innerHTML = `<p class="text-slate-400 text-center py-4 text-xs">No referrals in this stage.</p>`;
+        return;
+      }
+
+      container.innerHTML = list.map(ref => {
         const client = clientsMap[ref.referrer_client_id];
         const referrerName = getReferrerDisplayName(client);
         const referrerEmail = client?.email || 'N/A';
-        const isPending = (ref.status || 'PENDING') === 'PENDING';
+
+        let actionButtons = '';
+        if (subTabType === 'leads') {
+          actionButtons = `
+            <div class="grid grid-cols-2 gap-2 mt-3">
+              <button onclick="updateLeadStatus('${ref.id}', 'ACCEPTED')" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg text-xs">
+                Accept Lead ✓
+              </button>
+              <button onclick="updateLeadStatus('${ref.id}', 'REJECTED')" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 rounded-lg text-xs">
+                Reject Lead ✕
+              </button>
+            </div>`;
+        } else if (subTabType === 'active') {
+          actionButtons = `
+            <div class="grid grid-cols-2 gap-2 mt-3">
+              <button onclick="handleCloseWon('${ref.id}', '${ref.referrer_client_id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 rounded-lg text-xs">
+                Closed / Won 🎉
+              </button>
+              <button onclick="updateLeadStatus('${ref.id}', 'CLOSED_LOST')" class="bg-slate-600 hover:bg-slate-700 text-white font-semibold py-2 rounded-lg text-xs">
+                Closed / Lost ❌
+              </button>
+            </div>`;
+        }
 
         return `
           <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
             <div class="flex justify-between items-center mb-1">
-              <h4 class="text-base font-bold text-blue-900">🏠 Lead: ${ref.ref_first_name} ${ref.ref_last_name}</h4>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-800 uppercase">
-                ${ref.status || 'PENDING'}
+              <h4 class="text-base font-bold text-blue-900">🏠 ${ref.ref_first_name} ${ref.ref_last_name}</h4>
+              <span class="text-[9px] font-bold px-2 py-0.5 rounded ${getStatusBadgeClass(ref.status)} uppercase">
+                ${formatStatusLabel(ref.status)}
               </span>
             </div>
             <p class="text-xs text-slate-500 mb-3">Email: ${ref.ref_email} | Phone: ${ref.ref_phone}</p>
-            
-            <div class="p-3 bg-blue-50/80 rounded-lg border-l-4 border-blue-600 mb-3">
-              <p class="text-xs text-slate-700">
-                <span class="font-bold">Submitted By:</span> ${referrerName} (${referrerEmail})
-              </p>
+            <div class="p-2.5 bg-blue-50/80 rounded-lg border-l-4 border-blue-600 text-xs text-slate-700">
+              <span class="font-bold">Submitted By:</span> ${referrerName} (${referrerEmail})
             </div>
-
-            ${isPending ? `
-              <div class="grid grid-cols-2 gap-2 mt-2">
-                <button onclick="acceptLead('${ref.id}')" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg text-xs transition-colors">
-                  Accept Lead ✓
-                </button>
-                <button onclick="rejectLead('${ref.id}')" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 rounded-lg text-xs transition-colors">
-                  Reject Lead ✕
-                </button>
-              </div>
-            ` : ''}
+            ${actionButtons}
           </div>
         `;
       }).join('');
     }
 
-    // ACCEPT LEAD ACTION
-    async function acceptLead(id) {
-      await supabaseClient.from('referrals').update({ status: 'ACCEPTED' }).eq('id', id);
-      loadAgentPortalLeads();
-    }
-
-    // REJECT LEAD ACTION (FLAGS AS REJECTED / CLOSED)
-    async function rejectLead(id) {
-      const { error } = await supabaseClient
-        .from('referrals')
-        .update({ status: 'REJECTED' })
-        .eq('id', id);
-
-      if (error) {
-        alert("Error rejecting lead: " + error.message);
-      } else {
-        loadAgentPortalLeads();
+    function getStatusBadgeClass(status) {
+      switch (status) {
+        case 'ACCEPTED': return 'bg-emerald-100 text-emerald-800';
+        case 'CLOSED_WON': return 'bg-emerald-600 text-white';
+        case 'PENDING_BROKER_APPROVAL': return 'bg-amber-100 text-amber-800';
+        case 'CLOSED_LOST': case 'REJECTED': return 'bg-red-100 text-red-800';
+        default: return 'bg-blue-100 text-blue-800';
       }
     }
 
-    // LOAD REJECTED / CLOSED LEADS (BROKER EXCLUSIVE VIEW)
-    async function loadBrokerRejectedLeads() {
-      const container = document.getElementById('broker-rejected-leads-container');
-      if (!container) return;
+    function formatStatusLabel(status) {
+      if (status === 'PENDING_BROKER_APPROVAL') return 'Awaiting Broker Approval';
+      return status || 'PENDING';
+    }
 
-      container.innerHTML = `<p class="text-slate-400 text-center py-2 text-xs">Loading audit data...</p>`;
+    // UPDATE STATUS GENERIC
+    async function updateLeadStatus(id, newStatus) {
+      const { error } = await supabaseClient.from('referrals').update({ status: newStatus }).eq('id', id);
+      if (error) alert("Error: " + error.message);
+      else loadAgentPortalData();
+    }
+
+    // HANDLE CLOSED/WON ACTION BY AGENT
+    async function handleCloseWon(referralId, referrerClientId) {
+      let referrerRole = 'agent';
+      if (referrerClientId) {
+        const { data } = await supabaseClient.from('clients').select('role').eq('id', referrerClientId).maybeSingle();
+        if (data) referrerRole = data.role;
+      }
+
+      // If submitted by a Client, route through Broker Approval for Points
+      if (referrerRole === 'client') {
+        const { error } = await supabaseClient.from('referrals').update({ status: 'PENDING_BROKER_APPROVAL' }).eq('id', referralId);
+        if (error) alert("Error: " + error.message);
+        else {
+          alert("Lead marked as Closed/Won! Sent to Broker to approve points award.");
+          loadAgentPortalData();
+        }
+      } else {
+        // If submitted by Agent/Broker, close directly without points
+        updateLeadStatus(referralId, 'CLOSED_WON');
+      }
+    }
+
+    // BROKER VIEW DATA LOADING
+    async function loadBrokerData() {
+      await loadBrokerPendingApprovals();
+      await loadBrokerRejectedLeads();
+    }
+
+    async function loadBrokerPendingApprovals() {
+      const container = document.getElementById('broker-pending-approvals-container');
+      container.innerHTML = `<p class="text-slate-400 text-center py-2 text-xs">Loading approvals...</p>`;
 
       const { data: referrals, error } = await supabaseClient
         .from('referrals')
         .select('*')
-        .eq('status', 'REJECTED');
+        .eq('status', 'PENDING_BROKER_APPROVAL');
 
-      if (error) {
-        container.innerHTML = `<p class="text-red-500 text-xs text-center">Error: ${error.message}</p>`;
-        return;
-      }
-
-      if (!referrals || referrals.length === 0) {
-        container.innerHTML = `<p class="text-slate-400 text-center py-2 text-xs">No rejected leads found.</p>`;
+      if (error || !referrals || referrals.length === 0) {
+        container.innerHTML = `<p class="text-slate-400 text-center py-2 text-xs">No pending points approvals.</p>`;
         return;
       }
 
@@ -471,20 +525,71 @@
       container.innerHTML = referrals.map(ref => {
         const client = clientsMap[ref.referrer_client_id];
         const referrerName = getReferrerDisplayName(client);
-        const referrerEmail = client?.email || 'N/A';
+
+        return `
+          <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 shadow-sm space-y-2">
+            <div class="flex justify-between items-center">
+              <h5 class="text-sm font-bold text-slate-800">🏠 ${ref.ref_first_name} ${ref.ref_last_name}</h5>
+              <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-amber-600 text-white uppercase">Needs Approval</span>
+            </div>
+            <p class="text-xs text-slate-600">
+              Submitted by Client: <span class="font-semibold">${referrerName} (${client?.email || ''})</span>
+            </p>
+            <button onclick="approvePointsForClient('${ref.id}', '${ref.referrer_client_id}', ${client?.points || 0})" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg text-xs">
+              Approve & Award Points 💎
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // BROKER APPROVES POINTS
+    async function approvePointsForClient(referralId, clientId, currentPoints) {
+      // 1. Mark referral as Closed/Won
+      const { error: refErr } = await supabaseClient.from('referrals').update({ status: 'CLOSED_WON' }).eq('id', referralId);
+      if (refErr) { alert("Error updating referral: " + refErr.message); return; }
+
+      // 2. Award Points to Client
+      const newPoints = (currentPoints || 0) + 100; // Awards 100 points per closed referral
+      const { error: clientErr } = await supabaseClient.from('clients').update({ points: newPoints }).eq('id', clientId);
+
+      if (clientErr) alert("Error awarding points: " + clientErr.message);
+      else {
+        alert("Approved! 100 points awarded to the client.");
+        loadBrokerData();
+      }
+    }
+
+    // BROKER REJECTED / AUDIT VIEW
+    async function loadBrokerRejectedLeads() {
+      const container = document.getElementById('broker-rejected-leads-container');
+      if (!container) return;
+
+      const { data: referrals, error } = await supabaseClient
+        .from('referrals')
+        .select('*')
+        .in('status', ['REJECTED', 'CLOSED_LOST']);
+
+      if (error || !referrals || referrals.length === 0) {
+        container.innerHTML = `<p class="text-slate-400 text-center py-2 text-xs">No rejected or lost leads found.</p>`;
+        return;
+      }
+
+      const clientIds = [...new Set(referrals.map(r => r.referrer_client_id).filter(Boolean))];
+      const clientsMap = await fetchClientsMap(clientIds);
+
+      container.innerHTML = referrals.map(ref => {
+        const client = clientsMap[ref.referrer_client_id];
+        const referrerName = getReferrerDisplayName(client);
 
         return `
           <div class="bg-red-50/50 border border-red-200 rounded-xl p-3 shadow-sm">
             <div class="flex justify-between items-center mb-1">
               <h5 class="text-sm font-bold text-slate-800">🏠 ${ref.ref_first_name} ${ref.ref_last_name}</h5>
-              <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-red-600 text-white uppercase tracking-wider">
-                CLOSED / REJECTED
-              </span>
+              <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-red-600 text-white uppercase">${ref.status}</span>
             </div>
-            <p class="text-xs text-slate-500 mb-2">Email: ${ref.ref_email} | Phone: ${ref.ref_phone}</p>
-            <p class="text-xs text-slate-600">
-              <span class="font-semibold">Submitted By:</span> ${referrerName} (${referrerEmail})
-            </p>
+            <p class="text-xs text-slate-500 mb-1">Email: ${ref.ref_email} | Phone: ${ref.ref_phone}</p>
+            <p class="text-xs text-slate-600"><span class="font-semibold">Submitted By:</span> ${referrerName} (${client?.email || 'N/A'})</p>
           </div>
         `;
       }).join('');
