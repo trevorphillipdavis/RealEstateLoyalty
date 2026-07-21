@@ -56,7 +56,7 @@
     .btn-request { background: #d97706; padding: 8px 12px; font-size: 0.8rem; margin-top: 5px; }
     .btn-approve { background: #10b981; padding: 8px 12px; font-size: 0.8rem; margin-top: 5px; }
 
-    /* Bottom Navigation Bar */
+    /* Dynamic Bottom Navigation Bar */
     .nav-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 440px; height: 70px; background: white; border-top: 1px solid #e5e7eb; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -4px 15px rgba(0,0,0,0.04); border-radius: 16px 16px 0 0; z-index: 999; }
     .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #9ca3af; cursor: pointer; font-size: 0.75rem; font-weight: 600; flex-grow: 1; height: 100%; transition: color 0.2s; }
     .nav-item.active { color: #1e3a8a; }
@@ -142,10 +142,10 @@
       </div>
     </div>
 
-    <!-- TAB 3: AGENT PORTAL -->
+    <!-- TAB 3: AGENT PORTAL (Assigned Lead Management) -->
     <div id="tabAgent" class="card hidden">
       <div class="brand" style="color: #1e3a8a;">Agent Portal</div>
-      <div class="subtitle" style="margin-bottom:10px;">Assigned Leads Pipeline</div>
+      <div class="subtitle" style="margin-bottom:10px;">Assigned Referral Pipeline</div>
       
       <div class="pipeline-tabs">
         <button class="pipeline-btn active" id="agentFilterPending" onclick="setAgentFilter('pending')">Open</button>
@@ -157,7 +157,7 @@
       <div id="agentQueue"></div>
     </div>
 
-    <!-- TAB 4: BROKER PORTAL -->
+    <!-- TAB 4: BROKER PORTAL (Broker Administrative Control) -->
     <div id="tabBroker" class="card hidden">
       <div class="brand" style="color: #bc1a1a;">Brokerage Management</div>
       <div class="subtitle" style="margin-bottom:15px;">Broker Administrative Control</div>
@@ -187,7 +187,7 @@
       <div id="brokerQueue"></div>
     </div>
 
-    <!-- FIXED BOTTOM NAVIGATION BAR -->
+    <!-- FIXED DYNAMIC BOTTOM NAVIGATION BAR -->
     <nav class="nav-bar" id="appNavBar">
       <div class="nav-item active" id="navWallet" onclick="switchTab('wallet')">
         <span class="nav-icon">💎</span>
@@ -327,7 +327,7 @@
 
       userRole = profile?.role || 'client';
 
-      // Navigation visibility by role
+      // Role-Based Bottom Navigation Bar Display
       if (userRole === 'agent') {
         document.getElementById('navAgent').classList.remove('hidden');
         document.getElementById('navBroker').classList.add('hidden');
@@ -399,10 +399,10 @@
       }
     }
 
-    // AGENT QUEUE
+    // AGENT PORTAL QUEUE VIEW
     async function loadAgentQueue() {
       const container = document.getElementById('agentQueue');
-      container.innerHTML = `<p style="font-size:0.8rem; color:#888; margin-top:15px; text-align:center;">Loading records...</p>`;
+      container.innerHTML = `<p style="font-size:0.8rem; color:#888; margin-top:15px; text-align:center;">Loading referrals...</p>`;
 
       let { data: referrals } = await supabaseClient
         .from('referrals')
@@ -410,7 +410,7 @@
         .eq('status', agentFilter);
 
       if (!referrals || referrals.length === 0) {
-        container.innerHTML = `<p style="font-size:0.85rem; color:#6b7280; margin-top:20px; text-align:center;">No ${agentFilter} referrals.</p>`;
+        container.innerHTML = `<p style="font-size:0.85rem; color:#6b7280; margin-top:20px; text-align:center;">No ${agentFilter} referrals found.</p>`;
         return;
       }
 
@@ -442,7 +442,7 @@
       });
     }
 
-    // BROKER QUEUE
+    // BROKER QUEUE VIEW
     async function loadBrokerQueue() {
       const container = document.getElementById('brokerQueue');
       container.innerHTML = `<p style="font-size:0.8rem; color:#888; margin-top:15px; text-align:center;">Checking pending approvals...</p>`;
