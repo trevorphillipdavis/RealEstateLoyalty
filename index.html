@@ -31,6 +31,9 @@
     .points-display { background: #f0f4ff; border: 2px dashed #1e3a8a; padding: 20px; border-radius: 12px; margin: 20px 0; text-align: center; }
     .points-num { font-size: 3rem; font-weight: 900; color: #1e3a8a; }
     .tier-badge { display: inline-block; padding: 6px 14px; background: #e5e7eb; border-radius: 50px; font-weight: bold; font-size: 0.85rem; margin-top: 5px; text-transform: uppercase; }
+    .tier-Bronze { background: #cd7f32; color: white; }
+    .tier-Silver { background: #c0c0c0; color: #333; }
+    .tier-Gold { background: #ffd700; color: #333; }
     
     .divider { margin: 25px 0; border-bottom: 1px solid #eee; }
     .logout-btn { background: #ef4444; margin-top: 20px; }
@@ -301,19 +304,30 @@
       }
     }
 
+    // DASHBOARD INITIALIZER: Links pre-provisioned Agent rows on first sign-in
     async function showDashboard() {
       document.getElementById('authContainer').classList.add('hidden');
       document.getElementById('appInterface').classList.remove('hidden');
       document.getElementById('clientNameHeader').innerText = currentUser.email;
 
-      const { data: profile } = await supabaseClient
+      // Fetch profile by Auth ID or matching pre-provisioned Email
+      let { data: profile } = await supabaseClient
         .from('clients')
-        .select('total_points, current_tier, role')
-        .eq('id', currentUser.id)
-        .single();
+        .select('id, total_points, current_tier, role')
+        .or(`id.eq.${currentUser.id},email.eq.${currentUser.email.toLowerCase()}`)
+        .maybeSingle();
+
+      // If pre-provisioned agent profile exists under email, sync its ID to currentUser.id
+      if (profile && profile.id !== currentUser.id) {
+        await supabaseClient
+          .from('clients')
+          .update({ id: currentUser.id })
+          .eq('email', currentUser.email.toLowerCase());
+      }
 
       userRole = profile?.role || 'client';
 
+      // Toggle navigation visibility based on role
       if (userRole === 'agent') {
         document.getElementById('navAgent').classList.remove('hidden');
         document.getElementById('navBroker').classList.add('hidden');
@@ -333,11 +347,11 @@
       }
     }
 
-    // BROKER ACTION: Provision a New Agent
+    // BROKER ACTION: Provision a New Agent with UUID fallback
     async function createAgentByBroker() {
-      const first = document.getElementById('newAgentFirst').value;
-      const last = document.getElementById('newAgentLast').value;
-      const email = document.getElementById('newAgentEmail').value;
+      const first = document.getElementById('newAgentFirst').value.trim();
+      const last = document.getElementById('newAgentLast').value.trim();
+      const email = document.getElementById('newAgentEmail').value.toLowerCase().trim();
       const msg = document.getElementById('agentInviteMsg');
 
       if (!first || !email) {
@@ -351,7 +365,8 @@
 
       const { error } = await supabaseClient.from('clients').insert([
         { 
-          email: email.toLowerCase().trim(), 
+          id: crypto.randomUUID(),
+          email: email, 
           full_name: `${first} ${last}`.trim(), 
           role: 'agent' 
         }
@@ -363,7 +378,7 @@
         msg.innerText = "Error creating agent: " + error.message;
       } else {
         msg.style.color = '#10b981';
-        msg.innerText = `Agent ${first} ${last} provisioned! They can now sign up using ${email} to set their password.`;
+        msg.innerText = `Agent ${first} ${last} provisioned! They can now sign up using ${email}.`;
         document.getElementById('newAgentFirst').value = "";
         document.getElementById('newAgentLast').value = "";
         document.getElementById('newAgentEmail').value = "";
