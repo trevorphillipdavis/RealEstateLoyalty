@@ -338,7 +338,7 @@
       if (!clientIds || clientIds.length === 0) return {};
       const { data } = await supabaseClient
         .from('clients')
-        .select('id, full_name, email')
+        .select('id, full_name, email, role')
         .in('id', clientIds);
 
       const map = {};
@@ -348,7 +348,19 @@
       return map;
     }
 
-    // LOAD AGENT LEADS (INDEPENDENT OF SCHEMA EMBEDDING / CACHE)
+    // HELPER: GET CLEAN DISPLAY NAME OR FALLBACK TO ROLE
+    function getReferrerDisplayName(client) {
+      if (client?.full_name && client.full_name.trim() !== '') {
+        return client.full_name;
+      }
+      // If full_name is empty, display their assigned role (e.g. "Agent", "Broker", or "Client")
+      if (client?.role) {
+        return client.role.charAt(0).toUpperCase() + client.role.slice(1);
+      }
+      return 'Agent';
+    }
+
+    // LOAD AGENT LEADS
     async function loadAgentPortalLeads() {
       const container = document.getElementById('agent-leads-container');
       container.innerHTML = `<p class="text-slate-400 text-center py-4 text-xs">Loading active leads...</p>`;
@@ -371,13 +383,12 @@
         return;
       }
 
-      // Fetch client info for all referrers in parallel
       const clientIds = [...new Set(referrals.map(r => r.referrer_client_id).filter(Boolean))];
       const clientsMap = await fetchClientsMap(clientIds);
 
       container.innerHTML = referrals.map(ref => {
         const client = clientsMap[ref.referrer_client_id];
-        const referrerName = client?.full_name || 'Customer';
+        const referrerName = getReferrerDisplayName(client);
         const referrerEmail = client?.email || 'N/A';
         const isPending = (ref.status || 'PENDING') === 'PENDING';
 
@@ -459,7 +470,7 @@
 
       container.innerHTML = referrals.map(ref => {
         const client = clientsMap[ref.referrer_client_id];
-        const referrerName = client?.full_name || 'Customer';
+        const referrerName = getReferrerDisplayName(client);
         const referrerEmail = client?.email || 'N/A';
 
         return `
