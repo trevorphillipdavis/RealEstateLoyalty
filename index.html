@@ -210,17 +210,18 @@
   </div>
 
   <script>
+    // Explicit global window attachment to prevent Uncaught ReferenceErrors in console
     const SUPABASE_URL = "https://pgudhthdmlcokwniuial.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBndWRodGhkbWxjb2t3bml1aWFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ1NTMxMTgsImV4cCI6MjEwMDEyOTExOH0.hZM89R6iIjBs6IVXDGRD0AwP4gF8ztdpxp73_x9sgyU";
     
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let isSignUpMode = true;
     let currentUser = null;
     let userRole = 'client';
     let agentFilter = 'pending';
 
-    supabaseClient.auth.onAuthStateChange((event, session) => {
+    window.supabaseClient.auth.onAuthStateChange((event, session) => {
       if (session) {
         currentUser = session.user;
         showDashboard();
@@ -290,7 +291,7 @@
       msgDiv.innerText = "Processing...";
 
       if (isSignUpMode) {
-        const { error } = await supabaseClient.auth.signUp({ email, password });
+        const { error } = await window.supabaseClient.auth.signUp({ email, password });
         if (error) { 
           msgDiv.style.color = '#ef4444'; 
           msgDiv.innerText = error.message; 
@@ -299,44 +300,49 @@
           msgDiv.innerText = "Account created! Check your email to verify, then log in."; 
         }
       } else {
-        const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        const { error } = await window.supabaseClient.auth.signInWithPassword({ email, password });
         if (error) { msgDiv.style.color = '#ef4444'; msgDiv.innerText = error.message; }
       }
     }
 
-    // DASHBOARD INITIALIZER: Syncs pre-provisioned agent rows on first sign-in
+    // DASHBOARD INITIALIZER: Guarantees role fetch and toggles bottom navigation bar
     async function showDashboard() {
       document.getElementById('authContainer').classList.add('hidden');
       document.getElementById('appInterface').classList.remove('hidden');
       document.getElementById('clientNameHeader').innerText = currentUser.email;
 
-      // 1. Fetch profile matching Auth ID or Email
-      let { data: profile } = await supabaseClient
+      // 1. Fetch profile directly by Email
+      let { data: profile } = await window.supabaseClient
         .from('clients')
         .select('id, total_points, current_tier, role')
-        .or(`id.eq.${currentUser.id},email.eq.${currentUser.email.toLowerCase()}`)
+        .eq('email', currentUser.email.toLowerCase())
         .maybeSingle();
 
-      // 2. Sync pre-provisioned profile ID to newly authenticated user ID
-      if (profile && profile.id !== currentUser.id) {
-        await supabaseClient
+      // 2. Fallback check by Auth ID if needed
+      if (!profile) {
+        const { data: idProfile } = await window.supabaseClient
           .from('clients')
-          .update({ id: currentUser.id })
-          .eq('email', currentUser.email.toLowerCase());
+          .select('id, total_points, current_tier, role')
+          .eq('id', currentUser.id)
+          .maybeSingle();
+        profile = idProfile;
       }
 
       userRole = profile?.role || 'client';
 
-      // Role-Based Bottom Navigation Bar Display
+      const navAgent = document.getElementById('navAgent');
+      const navBroker = document.getElementById('navBroker');
+
+      // Unhide navigation tabs based on user role
       if (userRole === 'agent') {
-        document.getElementById('navAgent').classList.remove('hidden');
-        document.getElementById('navBroker').classList.add('hidden');
+        navAgent.classList.remove('hidden');
+        navBroker.classList.add('hidden');
       } else if (userRole === 'broker') {
-        document.getElementById('navAgent').classList.remove('hidden');
-        document.getElementById('navBroker').classList.remove('hidden');
+        navAgent.classList.remove('hidden');
+        navBroker.classList.remove('hidden');
       } else {
-        document.getElementById('navAgent').classList.add('hidden');
-        document.getElementById('navBroker').classList.add('hidden');
+        navAgent.classList.add('hidden');
+        navBroker.classList.add('hidden');
       }
 
       if (profile) {
@@ -363,8 +369,7 @@
       msg.style.color = '#374151';
       msg.innerText = "Provisioning Agent...";
 
-      // Check if profile exists
-      const { data: existing } = await supabaseClient
+      const { data: existing } = await window.supabaseClient
         .from('clients')
         .select('id')
         .eq('email', email)
@@ -376,8 +381,7 @@
         return;
       }
 
-      // Insert pre-provisioned agent row
-      const { error } = await supabaseClient.from('clients').insert([
+      const { error } = await window.supabaseClient.from('clients').insert([
         { 
           id: crypto.randomUUID(),
           email: email, 
@@ -404,7 +408,7 @@
       const container = document.getElementById('agentQueue');
       container.innerHTML = `<p style="font-size:0.8rem; color:#888; margin-top:15px; text-align:center;">Loading referrals...</p>`;
 
-      let { data: referrals } = await supabaseClient
+      let { data: referrals } = await window.supabaseClient
         .from('referrals')
         .select(`*, clients (email, full_name, phone)`)
         .eq('status', agentFilter);
@@ -447,7 +451,7 @@
       const container = document.getElementById('brokerQueue');
       container.innerHTML = `<p style="font-size:0.8rem; color:#888; margin-top:15px; text-align:center;">Checking pending approvals...</p>`;
 
-      let { data: referrals } = await supabaseClient
+      let { data: referrals } = await window.supabaseClient
         .from('referrals')
         .select(`*, clients (email, full_name, phone)`)
         .eq('status', 'pending_broker_approval');
@@ -476,25 +480,25 @@
     }
 
     async function agentAcceptLead(id) {
-      await supabaseClient.from('referrals').update({ status: 'accepted' }).eq('id', id);
+      await window.supabaseClient.from('referrals').update({ status: 'accepted' }).eq('id', id);
       alert("Lead accepted into active pipeline!");
       loadAgentQueue();
     }
 
     async function agentRequestApproval(id) {
-      await supabaseClient.from('referrals').update({ status: 'pending_broker_approval' }).eq('id', id);
+      await window.supabaseClient.from('referrals').update({ status: 'pending_broker_approval' }).eq('id', id);
       alert("Transaction submitted to Broker for points disburse approval!");
       loadAgentQueue();
     }
 
     async function brokerApproveAndAward(referralId, clientUuid) {
-      const { data: profile } = await supabaseClient.from('clients').select('total_points').eq('id', clientUuid).single();
+      const { data: profile } = await window.supabaseClient.from('clients').select('total_points').eq('id', clientUuid).single();
       const newPointsTotal = (profile?.total_points || 0) + 500;
 
-      await supabaseClient.from('clients').update({ total_points: newPointsTotal }).eq('id', clientUuid);
-      await supabaseClient.from('referrals').update({ status: 'closed' }).eq('id', referralId);
+      await window.supabaseClient.from('clients').update({ total_points: newPointsTotal }).eq('id', clientUuid);
+      await window.supabaseClient.from('referrals').update({ status: 'closed' }).eq('id', referralId);
 
-      await supabaseClient.from('points_ledger').insert([
+      await window.supabaseClient.from('points_ledger').insert([
         { client_id: clientUuid, amount: 500, action_type: 'referral_bonus', description: 'Broker approved referral closing points' }
       ]);
 
@@ -517,7 +521,7 @@
 
       refMsg.innerText = "Submitting...";
 
-      const { error } = await supabaseClient.from('referrals').insert([
+      const { error } = await window.supabaseClient.from('referrals').insert([
         { referrer_client_id: currentUser.id, ref_first_name: firstName, ref_last_name: lastName, ref_email: email, ref_phone: phone }
       ]);
 
@@ -540,7 +544,7 @@
     }
 
     async function handleLogout() {
-      await supabaseClient.auth.signOut();
+      await window.supabaseClient.auth.signOut();
     }
 
     if ('serviceWorker' in navigator) {
