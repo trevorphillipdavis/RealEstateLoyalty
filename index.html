@@ -165,14 +165,16 @@
     // SUPABASE INITIALIZATION
     const SUPABASE_URL = "https://pgudhthdmlcokwniuial.supabase.co";
     const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY"; // Replace with your anon key
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Renamed to supabaseClient to prevent variable collision with global CDN library object
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let isSignUp = false;
     let currentUser = null;
     let currentUserRole = 'client';
 
     // AUTH STATE LISTENER
-    supabase.auth.onAuthStateChange(async (event, session) => {
+    supabaseClient.auth.onAuthStateChange(async (event, session) => {
       if (session) {
         currentUser = session.user;
         await fetchUserRole(currentUser.id);
@@ -187,7 +189,7 @@
     // FETCH USER ROLE FROM CLIENTS TABLE
     async function fetchUserRole(userId) {
       try {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
           .from('clients')
           .select('role')
           .eq('id', userId)
@@ -254,17 +256,17 @@
 
       if (isSignUp) {
         const fullName = document.getElementById('full-name-input').value;
-        const { data, error } = await supabase.auth.signUp({ email, password });
+        const { data, error } = await supabaseClient.auth.signUp({ email, password });
         if (error) {
           errorEl.innerText = error.message;
           errorEl.classList.remove('hidden');
           return;
         }
         if (data.user) {
-          await supabase.from('clients').insert([{ id: data.user.id, email: email, full_name: fullName, role: 'client' }]);
+          await supabaseClient.from('clients').insert([{ id: data.user.id, email: email, full_name: fullName, role: 'client' }]);
         }
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
         if (error) {
           errorEl.innerText = error.message;
           errorEl.classList.remove('hidden');
@@ -273,7 +275,7 @@
     }
 
     async function handleLogout() {
-      await supabase.auth.signOut();
+      await supabaseClient.auth.signOut();
     }
 
     function switchTab(tabId) {
@@ -287,13 +289,57 @@
       }
     }
 
+    // SUBMIT REFERRAL
+    async function handleSubmitReferral(e) {
+      e.preventDefault();
+      const firstName = document.getElementById('ref-first-name').value;
+      const lastName = document.getElementById('ref-last-name').value;
+      const email = document.getElementById('ref-email').value;
+      const phone = document.getElementById('ref-phone').value;
+
+      const { error } = await supabaseClient.from('referrals').insert([{
+        client_id: currentUser.id,
+        first_name: firstName,
+        last_name: lastName,
+        email: email,
+        phone: phone,
+        status: 'PENDING'
+      }]);
+
+      if (error) {
+        alert("Error submitting referral: " + error.message);
+      } else {
+        alert("Referral submitted successfully!");
+        document.getElementById('referral-form').reset();
+      }
+    }
+
+    // PROVISION AGENT (BROKER ONLY)
+    async function handleProvisionAgent(e) {
+      e.preventDefault();
+      const name = document.getElementById('agent-name').value;
+      const email = document.getElementById('agent-email').value;
+
+      const { error } = await supabaseClient.from('clients').insert([{
+        full_name: name,
+        email: email,
+        role: 'agent'
+      }]);
+
+      if (error) {
+        alert("Error provisioning agent: " + error.message);
+      } else {
+        alert(`Agent profile for ${name} created. You can now configure their password in Supabase Auth.`);
+        document.getElementById('provision-agent-form').reset();
+      }
+    }
+
     // LOAD AGENT LEADS (EXCLUDES REJECTED LEADS FOR AGENTS)
     async function loadAgentPortalLeads() {
       const container = document.getElementById('agent-leads-container');
       container.innerHTML = `<p class="text-slate-400 text-center py-4 text-xs">Loading active leads...</p>`;
 
-      // Exclude REJECTED leads when fetching for the Agent Portal
-      let query = supabase
+      let query = supabaseClient
         .from('referrals')
         .select(`
           id,
@@ -309,7 +355,6 @@
           )
         `);
 
-      // Filter out REJECTED leads if user is an agent
       if (currentUserRole === 'agent') {
         query = query.neq('status', 'REJECTED');
       }
@@ -364,13 +409,13 @@
 
     // ACCEPT LEAD ACTION
     async function acceptLead(id) {
-      await supabase.from('referrals').update({ status: 'ACCEPTED' }).eq('id', id);
+      await supabaseClient.from('referrals').update({ status: 'ACCEPTED' }).eq('id', id);
       loadAgentPortalLeads();
     }
 
     // REJECT LEAD ACTION (FLAGS AS REJECTED / CLOSED)
     async function rejectLead(id) {
-      const { error } = await supabase
+      const { error } = await supabaseClient
         .from('referrals')
         .update({ status: 'REJECTED' })
         .eq('id', id);
@@ -389,7 +434,7 @@
 
       container.innerHTML = `<p class="text-slate-400 text-center py-2 text-xs">Loading audit data...</p>`;
 
-      const { data: referrals, error } = await supabase
+      const { data: referrals, error } = await supabaseClient
         .from('referrals')
         .select(`
           id,
