@@ -73,7 +73,7 @@
     </div>
     
     <div class="form-group">
-      <label for="password">Password (Set your password)</label>
+      <label for="password">Password</label>
       <input type="password" id="password" placeholder="••••••••">
     </div>
     
@@ -154,12 +154,12 @@
       <div id="agentQueue"></div>
     </div>
 
-    <!-- TAB 4: BROKER PORTAL (Includes Agent Creation Form + Point Approvals) -->
+    <!-- TAB 4: BROKER PORTAL -->
     <div id="tabBroker" class="card hidden">
       <div class="brand" style="color: #bc1a1a;">Brokerage Management</div>
       <div class="subtitle" style="margin-bottom:15px;">Broker Administrative Control</div>
 
-      <!-- Form for Brokers to Add New Agents -->
+      <!-- Agent Provisioning Form -->
       <div style="background: #fff5f5; border: 1px solid #fed7d7; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
         <h4 style="color: #9b2c2c; margin-bottom: 8px;">➕ Register New Agent</h4>
         <div class="form-row">
@@ -184,7 +184,7 @@
       <div id="brokerQueue"></div>
     </div>
 
-    <!-- DYNAMIC NAVIGATION BAR -->
+    <!-- FIXED BOTTOM NAVIGATION BAR -->
     <nav class="nav-bar" id="appNavBar">
       <div class="nav-item active" id="navWallet" onclick="switchTab('wallet')">
         <span class="nav-icon">💎</span>
@@ -287,9 +287,7 @@
       msgDiv.innerText = "Processing...";
 
       if (isSignUpMode) {
-        // Sign up user with the password they set
-        const { data, error } = await supabaseClient.auth.signUp({ email, password });
-        
+        const { error } = await supabaseClient.auth.signUp({ email, password });
         if (error) { 
           msgDiv.style.color = '#ef4444'; 
           msgDiv.innerText = error.message; 
@@ -308,7 +306,6 @@
       document.getElementById('appInterface').classList.remove('hidden');
       document.getElementById('clientNameHeader').innerText = currentUser.email;
 
-      // Check User Role from Database
       const { data: profile } = await supabaseClient
         .from('clients')
         .select('total_points, current_tier, role')
@@ -317,7 +314,6 @@
 
       userRole = profile?.role || 'client';
 
-      // Show/Hide Portal tabs based on role
       if (userRole === 'agent') {
         document.getElementById('navAgent').classList.remove('hidden');
         document.getElementById('navBroker').classList.add('hidden');
@@ -325,7 +321,6 @@
         document.getElementById('navAgent').classList.remove('hidden');
         document.getElementById('navBroker').classList.remove('hidden');
       } else {
-        // Clients do NOT see Agent or Broker tabs
         document.getElementById('navAgent').classList.add('hidden');
         document.getElementById('navBroker').classList.add('hidden');
       }
@@ -351,23 +346,24 @@
         return;
       }
 
+      msg.style.color = '#374151';
       msg.innerText = "Provisioning Agent...";
 
-      // Insert pre-provisioned agent record into database
       const { error } = await supabaseClient.from('clients').insert([
         { 
-          email: email.toLowerCase(), 
+          email: email.toLowerCase().trim(), 
           full_name: `${first} ${last}`.trim(), 
           role: 'agent' 
         }
       ]);
 
       if (error) {
+        console.error("Agent Provision Error:", error);
         msg.style.color = '#ef4444';
         msg.innerText = "Error creating agent: " + error.message;
       } else {
         msg.style.color = '#10b981';
-        msg.innerText = `Agent ${first} ${last} provisioned! They can now log in using ${email} and set their password.`;
+        msg.innerText = `Agent ${first} ${last} provisioned! They can now sign up using ${email} to set their password.`;
         document.getElementById('newAgentFirst').value = "";
         document.getElementById('newAgentLast').value = "";
         document.getElementById('newAgentEmail').value = "";
