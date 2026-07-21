@@ -304,20 +304,20 @@
       }
     }
 
-    // DASHBOARD INITIALIZER: Links pre-provisioned Agent rows on first sign-in
+    // DASHBOARD INITIALIZER: Syncs pre-provisioned agent rows on first sign-in
     async function showDashboard() {
       document.getElementById('authContainer').classList.add('hidden');
       document.getElementById('appInterface').classList.remove('hidden');
       document.getElementById('clientNameHeader').innerText = currentUser.email;
 
-      // Fetch profile by Auth ID or matching pre-provisioned Email
+      // 1. Fetch profile matching Auth ID or Email
       let { data: profile } = await supabaseClient
         .from('clients')
         .select('id, total_points, current_tier, role')
         .or(`id.eq.${currentUser.id},email.eq.${currentUser.email.toLowerCase()}`)
         .maybeSingle();
 
-      // If pre-provisioned agent profile exists under email, sync its ID to currentUser.id
+      // 2. Sync pre-provisioned profile ID to newly authenticated user ID
       if (profile && profile.id !== currentUser.id) {
         await supabaseClient
           .from('clients')
@@ -327,7 +327,7 @@
 
       userRole = profile?.role || 'client';
 
-      // Toggle navigation visibility based on role
+      // Navigation visibility by role
       if (userRole === 'agent') {
         document.getElementById('navAgent').classList.remove('hidden');
         document.getElementById('navBroker').classList.add('hidden');
@@ -347,7 +347,7 @@
       }
     }
 
-    // BROKER ACTION: Provision a New Agent with UUID fallback
+    // BROKER ACTION: Provision a New Agent
     async function createAgentByBroker() {
       const first = document.getElementById('newAgentFirst').value.trim();
       const last = document.getElementById('newAgentLast').value.trim();
@@ -363,6 +363,20 @@
       msg.style.color = '#374151';
       msg.innerText = "Provisioning Agent...";
 
+      // Check if profile exists
+      const { data: existing } = await supabaseClient
+        .from('clients')
+        .select('id')
+        .eq('email', email)
+        .maybeSingle();
+
+      if (existing) {
+        msg.style.color = '#ef4444';
+        msg.innerText = "An account with this email already exists.";
+        return;
+      }
+
+      // Insert pre-provisioned agent row
       const { error } = await supabaseClient.from('clients').insert([
         { 
           id: crypto.randomUUID(),
