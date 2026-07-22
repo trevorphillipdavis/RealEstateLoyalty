@@ -270,7 +270,7 @@
           </article>
 
           <article class="border border-slate-200 rounded-xl overflow-hidden bg-slate-50/50 shadow-sm">
-            <div class="bg-c21gold h-24 flex items-center justify-center text-c21dark text-3xl">🏡</div>
+            <div class="bg-c21gold h-24 flex items-center justify-center text-c21gold text-3xl">🏡</div>
             <div class="p-3">
               <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-c21gold-light text-c21gold uppercase border border-c21gold-border">Buyer Tips</span>
               <h4 class="font-bold text-sm text-slate-800 mt-1">Top Suburban Neighborhoods to Watch in 2026</h4>
@@ -416,7 +416,7 @@
 
   <!-- ALWAYS VISIBLE VERSION FOOTER -->
   <footer class="fixed bottom-0 left-0 right-0 bg-c21dark py-1 text-center border-t border-c21gold/20 z-50">
-    <p class="text-[10px] font-bold text-c21gold tracking-wider">CENTURY21 Global Connections Realty® v1.0.12</p>
+    <p class="text-[10px] font-bold text-c21gold tracking-wider">CENTURY21 Global Connections Realty® v1.0.13</p>
   </footer>
 
   <!-- APP JAVASCRIPT -->
@@ -633,7 +633,7 @@
       document.getElementById('auth-toggle-btn').innerText = isSignUp ? 'Already have an account? Log In' : 'Need an account? Sign Up';
     }
 
-    // AUTHENTICATION HANDLER
+    // AUTHENTICATION HANDLER (WITH REFERRAL-TO-CLIENT CONVERSION HOOK)
     async function handleAuth(e) {
       e.preventDefault();
       const email = document.getElementById('email-input').value;
@@ -677,6 +677,7 @@
         }
 
         if (data.user) {
+          // 1. Create client profile
           const { error: dbError } = await supabaseClient.from('clients').insert([{ 
             id: data.user.id, 
             email: email, 
@@ -690,6 +691,20 @@
           if (dbError) {
             console.error("Error creating client profile record:", dbError.message);
           }
+
+          // 2. Check if this email matches an existing referral and link it
+          const { data: matchedRef } = await supabaseClient
+            .from('referrals')
+            .select('id')
+            .eq('ref_email', email)
+            .maybeSingle();
+
+          if (matchedRef) {
+            await supabaseClient
+              .from('referrals')
+              .update({ converted_client_id: data.user.id })
+              .eq('id', matchedRef.id);
+          }
         }
       } else {
         const { error } = await supabaseClient.auth.signInWithPassword({ 
@@ -699,7 +714,7 @@
 
         if (error) {
           errorEl.innerText = error.message;
-          errorEl.classList.remove('hidden');
+          errorEl.classList.add('hidden');
         }
       }
     }
@@ -884,6 +899,7 @@
       `;
     }
 
+    // ACCOUNT ACTIVITY (BADGES DYNAMICALLY AS "Client ✓" IF CONVERTED, ELSE "Referral ✓")
     async function loadClientReferrals() {
       const container = document.getElementById('client-referrals-container');
       container.innerHTML = `<p class="text-slate-400 text-center py-8 text-xs">Loading activity records...</p>`;
@@ -904,12 +920,16 @@
       }
 
       container.innerHTML = referrals.map(ref => {
+        const isConverted = !!ref.converted_client_id;
+        const badgeText = isConverted ? 'Client ✓' : 'Referral ✓';
+        const badgeColor = isConverted ? 'bg-blue-100 text-blue-800' : 'bg-emerald-100 text-emerald-800';
+
         return `
           <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-2">
             <div class="flex justify-between items-center">
               <h4 class="text-sm font-bold text-c21dark">🏠 ${ref.ref_first_name} ${ref.ref_last_name}</h4>
-              <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 uppercase">
-                Referral ✓
+              <span class="text-[9px] font-bold px-2 py-0.5 rounded ${badgeColor} uppercase">
+                ${badgeText}
               </span>
             </div>
             
@@ -1145,7 +1165,7 @@
       await loadBrokerRejectedLeads();
     }
 
-    // BROKER PENDING APPROVALS (CLOSED/WON POINTS AWARD)
+    // BROKER PENDING APPROVALS WITH ACCEPT / REJECT BUTTONS
     async function loadBrokerPendingApprovals() {
       const container = document.getElementById('broker-pending-approvals-container');
       container.innerHTML = `<p class="text-slate-400 text-center py-2 text-xs">Loading approvals...</p>`;
@@ -1191,7 +1211,7 @@
             </div>
             ${renderPointBadge(ref.status)}
             
-            <!-- ACCEPT OR REJECT BUTTONS FOR BROKER -->
+            <!-- BROKER ACCEPT OR REJECT BUTTONS -->
             <div class="grid grid-cols-2 gap-2 pt-2">
               <button onclick="approvePointsForClient('${ref.id}', '${ref.referrer_client_id}', ${client?.points || 0}, ${isAgentSub})" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg text-xs">
                 Accept 💎
@@ -1227,7 +1247,7 @@
     async function rejectPendingApproval(referralId) {
       const { error } = await supabaseClient
         .from('referrals')
-        .update({ status: 'ACCEPTED' }) // Revert back to active/accepted status if broker rejects points claim
+        .update({ status: 'ACCEPTED' })
         .eq('id', referralId);
 
       if (error) {
@@ -1238,7 +1258,6 @@
       }
     }
 
-    // LOAD PENDING REVIEW LEADS FOR BROKER (REJECTED OR ACTIVE SET TO CLOSED/LOST)
     async function loadBrokerRejectedLeads() {
       const container = document.getElementById('broker-rejected-leads-container');
       if (!container) return;
@@ -1255,7 +1274,7 @@
         return s === 'PENDING_BROKER_REVIEW' || s === 'REJECTED' || s === 'CLOSED_LOST' || s === 'LOST';
       });
 
-      if (reviewLeads.length === 0) {
+      if (reviewLeids.length === 0) {
         container.innerHTML = `<p class="text-slate-400 text-center py-2 text-xs">No pending review leads found.</p>`;
         return;
       }
@@ -1282,7 +1301,7 @@
           brokerActions = `
             <div class="grid grid-cols-2 gap-2 pt-2">
               <button onclick="openReassignModal('${ref.id}')" class="bg-c21dark hover:bg-black text-c21gold font-semibold py-2 rounded-lg text-xs border border-c21gold/30">
-                🔄 Re-assign Agent
+                🔄 Re-agent Agent
               </button>
               <button onclick="brokerCloseAsLost('${ref.id}')" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 rounded-lg text-xs">
                 ❌ Closed/Lost
