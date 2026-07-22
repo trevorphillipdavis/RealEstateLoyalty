@@ -3,8 +3,29 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Brokerage Rewards</title>
+  <title>Brokerage Rewards - Century 21 Edition</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            c21gold: {
+              DEFAULT: '#C5A059',
+              hover: '#B08E46',
+              light: '#F8F4E8',
+              border: '#E2D1A6',
+            },
+            c21dark: {
+              DEFAULT: '#212121',
+              hover: '#121212',
+              card: '#1A1A1A'
+            }
+          }
+        }
+      }
+    }
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="bg-slate-100 min-h-screen flex flex-col items-center justify-between font-sans pb-28 relative">
@@ -15,7 +36,10 @@
     <!-- AUTH CARD (Shown when logged out - DEFAULT IS LOG IN) -->
     <div id="auth-card" class="bg-white rounded-2xl shadow-xl p-6 border border-slate-200">
       <div class="text-center mb-6">
-        <h1 class="text-2xl font-bold text-blue-900" id="auth-title">Brokerage Rewards</h1>
+        <div class="inline-block bg-c21dark px-3 py-1 rounded-md mb-2">
+          <span class="text-c21gold font-extrabold text-xs tracking-widest uppercase">CENTURY 21</span>
+        </div>
+        <h1 class="text-2xl font-bold text-c21dark" id="auth-title">Brokerage Rewards</h1>
         <p class="text-slate-500 text-sm mt-1" id="auth-subtitle">Log in to view your account</p>
       </div>
 
@@ -25,23 +49,23 @@
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="block text-xs font-semibold text-slate-600 mb-1">First Name</label>
-              <input type="text" id="first-name-input" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Jane">
+              <input type="text" id="first-name-input" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-c21gold" placeholder="Jane">
             </div>
             <div>
               <label class="block text-xs font-semibold text-slate-600 mb-1">Last Name</label>
-              <input type="text" id="last-name-input" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Doe">
+              <input type="text" id="last-name-input" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-c21gold" placeholder="Doe">
             </div>
           </div>
 
           <div>
             <label class="block text-xs font-semibold text-slate-600 mb-1">Phone Number</label>
-            <input type="tel" id="phone-input" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="(555) 000-0000">
+            <input type="tel" id="phone-input" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-c21gold" placeholder="(555) 000-0000">
           </div>
 
           <!-- AGENT SELECTION DROPDOWN -->
           <div>
             <label class="block text-xs font-semibold text-slate-600 mb-1">Select Your Realtor (Optional)</label>
-            <select id="agent-select-input" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-xs">
+            <select id="agent-select-input" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-c21gold bg-white text-xs">
               <option value="">-- Assign directly to Broker --</option>
             </select>
           </div>
@@ -49,24 +73,24 @@
 
         <div>
           <label class="block text-xs font-semibold text-slate-600 mb-1">Email Address (Username)</label>
-          <input type="email" id="email-input" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="name@example.com">
+          <input type="email" id="email-input" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-c21gold" placeholder="name@example.com">
         </div>
 
         <div>
           <label class="block text-xs font-semibold text-slate-600 mb-1">Password</label>
-          <input type="password" id="password-input" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="••••••••">
+          <input type="password" id="password-input" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-c21gold" placeholder="••••••••">
         </div>
 
         <p id="auth-error" class="text-red-500 text-xs text-center hidden"></p>
 
-        <button type="submit" id="auth-submit-btn" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-semibold py-2.5 rounded-lg transition-colors">
+        <button type="submit" id="auth-submit-btn" class="w-full bg-c21dark hover:bg-black text-c21gold font-semibold py-2.5 rounded-lg transition-colors border border-c21gold/30">
           Log In
         </button>
       </form>
 
       <!-- Toggle option below to switch to Sign Up -->
       <div class="text-center mt-4">
-        <button onclick="toggleAuthMode()" id="auth-toggle-btn" class="text-xs text-blue-600 hover:underline font-medium">
+        <button onclick="toggleAuthMode()" id="auth-toggle-btn" class="text-xs text-c21gold hover:underline font-semibold">
           Need an account? Sign Up
         </button>
       </div>
@@ -76,24 +100,24 @@
     <div id="app-content" class="hidden w-full space-y-4">
 
       <!-- HEADER CARD -->
-      <div class="bg-white rounded-2xl shadow-sm p-4 border border-slate-200 flex justify-between items-center">
+      <div class="bg-c21dark rounded-2xl shadow-md p-4 border border-c21gold/20 flex justify-between items-center text-white">
         <div>
-          <h2 class="text-lg font-bold text-blue-900" id="welcome-header">Welcome Back!</h2>
-          <p class="text-xs text-slate-500" id="user-email-display"></p>
+          <span class="text-[10px] font-extrabold text-c21gold tracking-widest uppercase block mb-0.5">CENTURY 21</span>
+          <h2 class="text-lg font-bold text-white" id="welcome-header">Welcome Back!</h2>
         </div>
-        <button onclick="handleLogout()" class="text-xs bg-red-50 text-red-600 border border-red-200 px-3 py-1.5 rounded-lg hover:bg-red-100 font-semibold">
+        <button onclick="handleLogout()" class="text-xs bg-red-950/60 text-red-300 border border-red-800/40 px-3 py-1.5 rounded-lg hover:bg-red-900/80 font-semibold transition-colors">
           Log Out
         </button>
       </div>
 
       <!-- TAB 1: REWARDS (CLIENT ONLY) -->
       <section id="tab-rewards" class="tab-content hidden bg-white rounded-2xl shadow-sm p-6 border border-slate-200 space-y-4">
-        <div class="border-2 border-dashed border-blue-300 rounded-xl p-4 text-center bg-blue-50/50">
-          <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Current Balance</p>
-          <p class="text-4xl font-extrabold text-blue-900 my-1" id="points-balance">0</p>
+        <div class="border-2 border-dashed border-c21gold-border rounded-xl p-4 text-center bg-c21gold-light">
+          <p class="text-xs font-semibold text-slate-600 uppercase tracking-wider">Current Balance</p>
+          <p class="text-4xl font-extrabold text-c21dark my-1" id="points-balance">0</p>
           <p class="text-xs text-slate-500 mb-2">1 Point = $1 Value</p>
-          <span class="inline-block bg-amber-600 text-white text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wide">
-            Bronze Member
+          <span class="inline-block bg-c21dark text-c21gold border border-c21gold/40 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wide">
+            Gold Tier Member
           </span>
         </div>
 
@@ -102,14 +126,14 @@
         <form id="referral-form" onsubmit="handleSubmitReferral(event)" class="space-y-3">
           <h3 class="font-bold text-slate-800 text-sm">Submit a New Referral</h3>
           <div class="grid grid-cols-2 gap-2">
-            <input type="text" id="ref-first-name" placeholder="First Name" required class="px-3 py-2 border rounded-lg text-sm">
-            <input type="text" id="ref-last-name" placeholder="Last Name" required class="px-3 py-2 border rounded-lg text-sm">
+            <input type="text" id="ref-first-name" placeholder="First Name" required class="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-c21gold focus:outline-none">
+            <input type="text" id="ref-last-name" placeholder="Last Name" required class="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-c21gold focus:outline-none">
           </div>
-          <input type="email" id="ref-email" placeholder="Referral's Email" required class="w-full px-3 py-2 border rounded-lg text-sm">
-          <input type="tel" id="ref-phone" placeholder="Referral's Phone Number" required class="w-full px-3 py-2 border rounded-lg text-sm">
-          <textarea id="ref-notes" rows="2" placeholder="Notes / Details (Optional)" class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500"></textarea>
+          <input type="email" id="ref-email" placeholder="Referral's Email" required class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-c21gold focus:outline-none">
+          <input type="tel" id="ref-phone" placeholder="Referral's Phone Number" required class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-c21gold focus:outline-none">
+          <textarea id="ref-notes" rows="2" placeholder="Notes / Details (Optional)" class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-c21gold focus:outline-none"></textarea>
           
-          <button type="submit" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-semibold py-2.5 rounded-lg text-sm">
+          <button type="submit" class="w-full bg-c21dark hover:bg-black text-c21gold font-semibold py-2.5 rounded-lg text-sm transition-colors border border-c21gold/30">
             Submit Referral
           </button>
         </form>
@@ -118,7 +142,7 @@
       <!-- TAB 2: MY REFERRALS (CLIENT ONLY) -->
       <section id="tab-my-referrals" class="tab-content hidden bg-white rounded-2xl shadow-sm p-6 border border-slate-200 space-y-4">
         <div class="text-center mb-2">
-          <h3 class="text-xl font-bold text-blue-900">Submitted Referrals</h3>
+          <h3 class="text-xl font-bold text-c21dark">Submitted Referrals</h3>
           <p class="text-xs text-slate-500">Track status and earned rewards</p>
         </div>
         
@@ -130,8 +154,8 @@
       <!-- TAB 3: MY REALTOR (CLIENT ONLY) -->
       <section id="tab-realtor" class="tab-content hidden bg-white rounded-2xl shadow-sm p-6 border border-slate-200 space-y-4">
         <div class="text-center mb-2">
-          <h3 class="text-xl font-bold text-blue-900">My Assigned Realtor</h3>
-          <p class="text-xs text-slate-500">Your dedicated real estate professional</p>
+          <h3 class="text-xl font-bold text-c21dark">My Assigned Realtor</h3>
+          <p class="text-xs text-slate-500">Your dedicated Century 21 professional</p>
         </div>
 
         <div id="realtor-profile-container" class="p-4 border border-slate-200 rounded-2xl bg-slate-50/50 shadow-sm text-center space-y-3">
@@ -148,13 +172,13 @@
       <!-- TAB 5: AGENT PORTAL (FOR AGENTS & BROKERS) -->
       <section id="tab-agent" class="tab-content hidden bg-white rounded-2xl shadow-sm p-6 border border-slate-200 space-y-4">
         <div class="text-center">
-          <h3 class="text-xl font-bold text-blue-900">Agent Portal</h3>
+          <h3 class="text-xl font-bold text-c21dark">Agent Portal</h3>
           <p class="text-xs text-slate-500">Assigned Referral Pipeline</p>
         </div>
 
         <!-- AGENT PORTAL SUB-TABS WITH TOTALS -->
         <div class="flex border-b border-slate-200 text-[11px] font-bold text-center">
-          <button id="agent-subtab-btn-leads" onclick="switchAgentSubTab('leads')" class="flex-1 py-2 border-b-2 border-blue-600 text-blue-600">
+          <button id="agent-subtab-btn-leads" onclick="switchAgentSubTab('leads')" class="flex-1 py-2 border-b-2 border-c21gold text-c21gold">
             Leads (<span id="count-leads">0</span>)
           </button>
           <button id="agent-subtab-btn-active" onclick="switchAgentSubTab('active')" class="flex-1 py-2 text-slate-400 hover:text-slate-600">
@@ -180,7 +204,7 @@
       <!-- TAB 6: BROKERAGE MANAGEMENT -->
       <section id="tab-broker" class="tab-content hidden bg-white rounded-2xl shadow-sm p-6 border border-slate-200 space-y-6">
         <div class="text-center">
-          <h3 class="text-xl font-bold text-blue-900">Brokerage Management</h3>
+          <h3 class="text-xl font-bold text-c21dark">Brokerage Management</h3>
           <p class="text-xs text-slate-500">Approvals & Audit</p>
         </div>
 
@@ -210,15 +234,15 @@
       <!-- TAB 7: LOCAL MARKET NEWS -->
       <section id="tab-news" class="tab-content hidden bg-white rounded-2xl shadow-sm p-6 border border-slate-200 space-y-4">
         <div class="text-center mb-2">
-          <h3 class="text-xl font-bold text-blue-900">Local Market News</h3>
+          <h3 class="text-xl font-bold text-c21dark">Local Market News</h3>
           <p class="text-xs text-slate-500">Latest updates in real estate & mortgage trends</p>
         </div>
 
         <div class="min-h-[380px] max-h-[380px] overflow-y-auto pr-1 space-y-4">
           <article class="border border-slate-200 rounded-xl overflow-hidden bg-slate-50/50 shadow-sm">
-            <div class="bg-blue-900 h-24 flex items-center justify-center text-white text-3xl">📈</div>
+            <div class="bg-c21dark h-24 flex items-center justify-center text-c21gold text-3xl">📈</div>
             <div class="p-3">
-              <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-800 uppercase">Market Analysis</span>
+              <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-c21gold-light text-c21gold uppercase border border-c21gold-border">Market Analysis</span>
               <h4 class="font-bold text-sm text-slate-800 mt-1">Local Housing Supply Reaches 6-Month High</h4>
               <p class="text-xs text-slate-500 mt-1">Inventory across the metro area has increased by 14% this quarter, offering buyers more leverage and competitive pricing options.</p>
               <div class="flex justify-between items-center mt-3 pt-2 border-t border-slate-200/60 text-[10px] text-slate-400">
@@ -229,9 +253,9 @@
           </article>
 
           <article class="border border-slate-200 rounded-xl overflow-hidden bg-slate-50/50 shadow-sm">
-            <div class="bg-emerald-800 h-24 flex items-center justify-center text-white text-3xl">🏡</div>
+            <div class="bg-c21gold h-24 flex items-center justify-center text-c21dark text-3xl">🏡</div>
             <div class="p-3">
-              <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 uppercase">Buyer Tips</span>
+              <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-c21gold-light text-c21gold uppercase border border-c21gold-border">Buyer Tips</span>
               <h4 class="font-bold text-sm text-slate-800 mt-1">Top Suburban Neighborhoods to Watch in 2026</h4>
               <p class="text-xs text-slate-500 mt-1">From top-rated school districts to new transit lines, these three surrounding suburbs are seeing rapid appreciation.</p>
               <div class="flex justify-between items-center mt-3 pt-2 border-t border-slate-200/60 text-[10px] text-slate-400">
@@ -242,9 +266,9 @@
           </article>
 
           <article class="border border-slate-200 rounded-xl overflow-hidden bg-slate-50/50 shadow-sm">
-            <div class="bg-amber-700 h-24 flex items-center justify-center text-white text-3xl">🏦</div>
+            <div class="bg-c21dark h-24 flex items-center justify-center text-c21gold text-3xl">🏦</div>
             <div class="p-3">
-              <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-800 uppercase">Mortgage Rates</span>
+              <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-c21gold-light text-c21gold uppercase border border-c21gold-border">Mortgage Rates</span>
               <h4 class="font-bold text-sm text-slate-800 mt-1">Mortgage Rates Stabilize Following Fed Update</h4>
               <p class="text-xs text-slate-500 mt-1">Fixed rates hold steady this week. Industry experts share strategies for refinancing and locking in competitive terms.</p>
               <div class="flex justify-between items-center mt-3 pt-2 border-t border-slate-200/60 text-[10px] text-slate-400">
@@ -260,10 +284,10 @@
   </main>
 
   <!-- SUBMIT LEAD MODAL POPUP -->
-  <div id="agent-lead-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+  <div id="agent-lead-modal" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 space-y-4 border border-slate-200 relative animate-in fade-in zoom-in duration-150">
       <div class="flex justify-between items-center border-b border-slate-100 pb-3">
-        <h3 class="font-bold text-blue-900 text-base flex items-center gap-2">
+        <h3 class="font-bold text-c21dark text-base flex items-center gap-2">
           <span>🏠</span> Submit New Lead
         </h3>
         <button onclick="closeAgentLeadModal()" class="text-slate-400 hover:text-slate-600 font-bold text-lg">&times;</button>
@@ -273,34 +297,34 @@
         <div class="grid grid-cols-2 gap-2">
           <div>
             <label class="block text-[11px] font-semibold text-slate-600 mb-1">First Name</label>
-            <input type="text" id="agent-lead-fn" required class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+            <input type="text" id="agent-lead-fn" required class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-c21gold">
           </div>
           <div>
             <label class="block text-[11px] font-semibold text-slate-600 mb-1">Last Name</label>
-            <input type="text" id="agent-lead-ln" required class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+            <input type="text" id="agent-lead-ln" required class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-c21gold">
           </div>
         </div>
 
         <div>
           <label class="block text-[11px] font-semibold text-slate-600 mb-1">Phone Number</label>
-          <input type="tel" id="agent-lead-phone" required class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500" placeholder="(555) 000-0000">
+          <input type="tel" id="agent-lead-phone" required class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-c21gold" placeholder="(555) 000-0000">
         </div>
 
         <div>
           <label class="block text-[11px] font-semibold text-slate-600 mb-1">Email Address</label>
-          <input type="email" id="agent-lead-email" required class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500" placeholder="lead@example.com">
+          <input type="email" id="agent-lead-email" required class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-c21gold" placeholder="lead@example.com">
         </div>
 
         <div>
           <label class="block text-[11px] font-semibold text-slate-600 mb-1">Notes / Details</label>
-          <textarea id="agent-lead-notes" rows="3" class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500" placeholder="Looking for 3 bed, 2 bath in suburbs..."></textarea>
+          <textarea id="agent-lead-notes" rows="3" class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-c21gold" placeholder="Looking for 3 bed, 2 bath in suburbs..."></textarea>
         </div>
 
         <div class="pt-2 flex gap-2">
           <button type="button" onclick="closeAgentLeadModal()" class="w-1/2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-lg text-xs">
             Cancel
           </button>
-          <button type="submit" class="w-1/2 bg-blue-900 hover:bg-blue-800 text-white font-semibold py-2.5 rounded-lg text-xs">
+          <button type="submit" class="w-1/2 bg-c21dark hover:bg-black text-c21gold font-semibold py-2.5 rounded-lg text-xs border border-c21gold/30">
             Submit Lead
           </button>
         </div>
@@ -308,10 +332,10 @@
     </div>
   </div>
 
-  <!-- BOTTOM NAVIGATION BAR WITH MY REALTOR INCLUDED -->
-  <nav id="bottom-nav" class="hidden w-full bg-white border-t border-slate-200 fixed bottom-6 left-0 right-0 py-2 px-1 shadow-lg z-40">
+  <!-- BOTTOM NAVIGATION BAR -->
+  <nav id="bottom-nav" class="hidden w-full bg-c21dark border-t border-c21gold/30 fixed bottom-6 left-0 right-0 py-2 px-1 shadow-2xl z-40">
     <div class="max-w-md mx-auto flex justify-around items-center" id="nav-tabs-container">
-      <button id="nav-rewards-btn" onclick="switchTab('tab-rewards')" class="nav-btn text-blue-600 flex flex-col items-center">
+      <button id="nav-rewards-btn" onclick="switchTab('tab-rewards')" class="nav-btn text-c21gold flex flex-col items-center">
         <span class="text-base">💎</span>
         <span class="text-[9px] font-semibold">Rewards</span>
       </button>
@@ -335,7 +359,7 @@
         <span class="text-base">🛡️</span>
         <span class="text-[9px] font-semibold">Agent Portal</span>
       </button>
-      <button id="nav-submit-lead-btn" onclick="openAgentLeadModal()" class="nav-btn hidden text-emerald-600 flex flex-col items-center font-bold">
+      <button id="nav-submit-lead-btn" onclick="openAgentLeadModal()" class="nav-btn hidden text-c21gold flex flex-col items-center font-bold">
         <span class="text-base">➕</span>
         <span class="text-[9px] font-semibold">Submit Lead</span>
       </button>
@@ -347,8 +371,8 @@
   </nav>
 
   <!-- ALWAYS VISIBLE VERSION FOOTER -->
-  <footer class="fixed bottom-0 left-0 right-0 bg-slate-200/80 backdrop-blur-xs py-1 text-center border-t border-slate-300 z-50">
-    <p class="text-[10px] font-bold text-slate-500 tracking-wider">v1.0.0</p>
+  <footer class="fixed bottom-0 left-0 right-0 bg-c21dark py-1 text-center border-t border-c21gold/20 z-50">
+    <p class="text-[10px] font-bold text-c21gold tracking-wider">CENTURY 21® Rewards v1.0.0</p>
   </footer>
 
   <!-- APP JAVASCRIPT -->
@@ -377,23 +401,33 @@
       }
     });
 
-    // FETCH USER ROLE AND ASSIGNED AGENT
+    // FETCH USER ROLE, ASSIGNED AGENT, AND FULL NAME FOR HEADER
     async function fetchUserRole(userId) {
       try {
         const { data, error } = await supabaseClient
           .from('clients')
-          .select('role, points, assigned_agent_id')
+          .select('role, points, assigned_agent_id, full_name')
           .eq('id', userId)
           .maybeSingle();
 
         if (error) {
-          console.error("Error fetching user role:", error.message);
+          console.error("Error fetching user profile:", error.message);
           currentUserRole = 'client';
         } else if (data) {
           currentUserRole = data.role || 'client';
           currentUserAssignedAgentId = data.assigned_agent_id;
+          
           if (document.getElementById('points-balance')) {
             document.getElementById('points-balance').innerText = data.points || 0;
+          }
+
+          const headerEl = document.getElementById('welcome-header');
+          if (headerEl) {
+            let firstName = '';
+            if (data.full_name && data.full_name.trim() !== '') {
+              firstName = data.full_name.trim().split(' ')[0];
+            }
+            headerEl.innerText = firstName ? `Welcome Back, ${firstName}!` : 'Welcome Back!';
           }
         }
       } catch (err) {
@@ -407,8 +441,6 @@
       document.getElementById('auth-card').classList.add('hidden');
       document.getElementById('app-content').classList.remove('hidden');
       document.getElementById('bottom-nav').classList.remove('hidden');
-
-      document.getElementById('user-email-display').innerText = currentUser.email;
 
       const rewardsNav = document.getElementById('nav-rewards-btn');
       const myReferralsNav = document.getElementById('nav-my-referrals-btn');
@@ -448,7 +480,7 @@
       document.getElementById('auth-card').classList.remove('hidden');
       document.getElementById('app-content').classList.add('hidden');
       document.getElementById('bottom-nav').classList.add('hidden');
-      populateAgentDropdown(); // Load agents into sign-up selector
+      populateAgentDropdown();
     }
 
     // POPULATE AGENT DROPDOWN FOR SIGN UP
@@ -502,7 +534,6 @@
         let selectedAgentId = document.getElementById('agent-select-input').value;
         const fullName = `${firstName} ${lastName}`.trim();
 
-        // Fallback to Broker if no Agent was selected
         if (!selectedAgentId) {
           const { data: brokerData } = await supabaseClient
             .from('clients')
@@ -561,26 +592,26 @@
       document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
       document.getElementById(tabId).classList.remove('hidden');
 
-      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.replace('text-blue-600', 'text-slate-400'));
+      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.replace('text-c21gold', 'text-slate-400'));
 
       if (tabId === 'tab-agent') {
         loadAgentPortalData();
-        if (document.getElementById('nav-agent-btn')) document.getElementById('nav-agent-btn').classList.replace('text-slate-400', 'text-blue-600');
+        if (document.getElementById('nav-agent-btn')) document.getElementById('nav-agent-btn').classList.replace('text-slate-400', 'text-c21gold');
       } else if (tabId === 'tab-broker') {
         loadBrokerData();
-        if (document.getElementById('nav-broker-btn')) document.getElementById('nav-broker-btn').classList.replace('text-slate-400', 'text-blue-600');
+        if (document.getElementById('nav-broker-btn')) document.getElementById('nav-broker-btn').classList.replace('text-slate-400', 'text-c21gold');
       } else if (tabId === 'tab-my-referrals') {
         loadClientReferrals();
-        if (document.getElementById('nav-my-referrals-btn')) document.getElementById('nav-my-referrals-btn').classList.replace('text-slate-400', 'text-blue-600');
+        if (document.getElementById('nav-my-referrals-btn')) document.getElementById('nav-my-referrals-btn').classList.replace('text-slate-400', 'text-c21gold');
       } else if (tabId === 'tab-realtor') {
         loadAssignedRealtor();
-        if (document.getElementById('nav-realtor-btn')) document.getElementById('nav-realtor-btn').classList.replace('text-slate-400', 'text-blue-600');
+        if (document.getElementById('nav-realtor-btn')) document.getElementById('nav-realtor-btn').classList.replace('text-slate-400', 'text-c21gold');
       } else if (tabId === 'tab-rewards') {
-        if (document.getElementById('nav-rewards-btn')) document.getElementById('nav-rewards-btn').classList.replace('text-slate-400', 'text-blue-600');
+        if (document.getElementById('nav-rewards-btn')) document.getElementById('nav-rewards-btn').classList.replace('text-slate-400', 'text-c21gold');
       } else if (tabId === 'tab-news') {
-        if (document.getElementById('nav-news-btn')) document.getElementById('nav-news-btn').classList.replace('text-slate-400', 'text-blue-600');
+        if (document.getElementById('nav-news-btn')) document.getElementById('nav-news-btn').classList.replace('text-slate-400', 'text-c21gold');
       } else if (tabId === 'tab-homes') {
-        if (document.getElementById('nav-homes-btn')) document.getElementById('nav-homes-btn').classList.replace('text-slate-400', 'text-blue-600');
+        if (document.getElementById('nav-homes-btn')) document.getElementById('nav-homes-btn').classList.replace('text-slate-400', 'text-c21gold');
       }
     }
 
@@ -591,7 +622,7 @@
       ['leads', 'active', 'won', 'lost'].forEach(t => {
         const btn = document.getElementById(`agent-subtab-btn-${t}`);
         if (t === subTab) {
-          btn.className = "flex-1 py-2 border-b-2 border-blue-600 text-blue-600 font-bold";
+          btn.className = "flex-1 py-2 border-b-2 border-c21gold text-c21gold font-bold";
         } else {
           btn.className = "flex-1 py-2 text-slate-400 hover:text-slate-600 font-bold";
         }
@@ -669,18 +700,16 @@
       }
     }
 
-    // LOAD ASSIGNED REALTOR PROFILE FOR CLIENT
+    // LOAD ASSIGNED REALTOR PROFILE FOR CLIENT (WITH CALL, TEXT & EMAIL BUTTONS)
     async function loadAssignedRealtor() {
       const container = document.getElementById('realtor-profile-container');
 
       if (!currentUserAssignedAgentId) {
-        // Fetch fresh if null
         const { data: me } = await supabaseClient.from('clients').select('assigned_agent_id').eq('id', currentUser.id).maybeSingle();
         if (me?.assigned_agent_id) currentUserAssignedAgentId = me.assigned_agent_id;
       }
 
       if (!currentUserAssignedAgentId) {
-        // Default to Broker if still missing
         const { data: broker } = await supabaseClient.from('clients').select('*').eq('role', 'broker').limit(1).maybeSingle();
         if (broker) currentUserAssignedAgentId = broker.id;
       }
@@ -705,13 +734,13 @@
       const roleTitle = agent.role === 'broker' ? 'Managing Broker' : 'Licensed Real Estate Agent';
 
       container.innerHTML = `
-        <div class="relative w-28 h-28 mx-auto rounded-full bg-blue-900 border-4 border-blue-100 flex items-center justify-center text-4xl text-white shadow-md overflow-hidden">
+        <div class="relative w-28 h-28 mx-auto rounded-full bg-c21dark border-4 border-c21gold flex items-center justify-center text-4xl text-c21gold shadow-md overflow-hidden">
           👤
         </div>
 
         <div>
-          <h4 class="text-lg font-bold text-blue-900">${displayName}</h4>
-          <span class="inline-block bg-blue-100 text-blue-800 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase mt-1">
+          <h4 class="text-lg font-bold text-c21dark">${displayName}</h4>
+          <span class="inline-block bg-c21gold-light text-c21gold border border-c21gold-border text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase mt-1">
             ${roleTitle}
           </span>
         </div>
@@ -725,18 +754,22 @@
           </p>
         </div>
 
-        <div class="grid grid-cols-2 gap-2 pt-2">
-          <a href="tel:${agent.phone || ''}" class="bg-blue-900 hover:bg-blue-800 text-white font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors">
-            <span>📞</span> Call Agent
+        <!-- 3-BUTTON GRID: CALL, TEXT, EMAIL -->
+        <div class="grid grid-cols-3 gap-2 pt-2">
+          <a href="tel:${agent.phone || ''}" class="bg-c21dark hover:bg-black text-c21gold font-bold py-2 px-1 rounded-xl text-[11px] flex flex-col items-center justify-center gap-1 transition-colors border border-c21gold/30">
+            <span>📞</span> Call
           </a>
-          <a href="mailto:${agent.email || ''}" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors">
-            <span>📧</span> Email Agent
+          <a href="sms:${agent.phone || ''}" class="bg-c21gold hover:bg-c21gold-hover text-white font-bold py-2 px-1 rounded-xl text-[11px] flex flex-col items-center justify-center gap-1 transition-colors">
+            <span>💬</span> Text
+          </a>
+          <a href="mailto:${agent.email || ''}" class="bg-slate-800 hover:bg-slate-900 text-slate-100 font-bold py-2 px-1 rounded-xl text-[11px] flex flex-col items-center justify-center gap-1 transition-colors">
+            <span>📧</span> Email
           </a>
         </div>
       `;
     }
 
-    // LOAD CLIENT SUBMITTED REFERRALS WITH STATUS & POINT VALUE
+    // LOAD CLIENT SUBMITTED REFERRALS (GREEN "SUBMITTED" BADGE & ESTIMATED/AWARDED POINTS)
     async function loadClientReferrals() {
       const container = document.getElementById('client-referrals-container');
       container.innerHTML = `<p class="text-slate-400 text-center py-8 text-xs">Loading your referrals...</p>`;
@@ -759,22 +792,18 @@
       container.innerHTML = referrals.map(ref => {
         const rawStatus = (ref.status || 'PENDING').toUpperCase();
         
-        let pointValue = 0;
-        let pointBadgeClass = 'bg-slate-100 text-slate-600';
-        if (rawStatus === 'CLOSED_WON' || rawStatus === 'WON') {
-          pointValue = 100;
-          pointBadgeClass = 'bg-amber-100 text-amber-800 font-extrabold';
-        } else if (rawStatus === 'PENDING_BROKER_APPROVAL') {
-          pointValue = 100;
-          pointBadgeClass = 'bg-amber-50 text-amber-700 italic';
-        }
+        const isAwarded = (rawStatus === 'CLOSED_WON' || rawStatus === 'WON');
+        const pointValueLabel = isAwarded ? '+100 Points (Awarded)' : '+100 Points (Estimated)';
+        const pointBadgeClass = isAwarded 
+          ? 'bg-c21gold-light text-c21gold font-extrabold border border-c21gold-border' 
+          : 'bg-slate-100 text-slate-700 font-medium border border-slate-300';
 
         return `
           <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-2">
             <div class="flex justify-between items-center">
-              <h4 class="text-sm font-bold text-blue-900">🏠 ${ref.ref_first_name} ${ref.ref_last_name}</h4>
-              <span class="text-[9px] font-bold px-2 py-0.5 rounded ${getStatusBadgeClass(rawStatus)} uppercase">
-                ${formatStatusLabel(rawStatus)}
+              <h4 class="text-sm font-bold text-c21dark">🏠 ${ref.ref_first_name} ${ref.ref_last_name}</h4>
+              <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 uppercase">
+                Submitted ✓
               </span>
             </div>
             
@@ -783,9 +812,9 @@
             ${ref.notes ? `<p class="text-xs text-slate-600 italic bg-slate-50 p-2 rounded border border-slate-100">📝 Notes: ${ref.notes}</p>` : ''}
 
             <div class="flex justify-between items-center pt-2 border-t border-slate-100 text-xs">
-              <span class="text-slate-500">Value:</span>
+              <span class="text-slate-500 font-semibold">Referral Value:</span>
               <span class="text-xs px-2.5 py-0.5 rounded-full ${pointBadgeClass}">
-                💎 +${pointValue} Points ${rawStatus === 'PENDING_BROKER_APPROVAL' ? '(Pending)' : ''}
+                💎 ${pointValueLabel}
               </span>
             </div>
           </div>
@@ -874,7 +903,7 @@
         if (subTabType === 'leads') {
           actionButtons = `
             <div class="grid grid-cols-2 gap-2 mt-3">
-              <button onclick="updateLeadStatus('${ref.id}', 'ACCEPTED')" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg text-xs">
+              <button onclick="updateLeadStatus('${ref.id}', 'ACCEPTED')" class="bg-c21dark hover:bg-black text-c21gold font-semibold py-2 rounded-lg text-xs border border-c21gold/30">
                 Accept Lead ✓
               </button>
               <button onclick="updateLeadStatus('${ref.id}', 'REJECTED')" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 rounded-lg text-xs">
@@ -896,7 +925,7 @@
         return `
           <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
             <div class="flex justify-between items-center mb-1">
-              <h4 class="text-base font-bold text-blue-900">🏠 ${ref.ref_first_name} ${ref.ref_last_name}</h4>
+              <h4 class="text-base font-bold text-c21dark">🏠 ${ref.ref_first_name} ${ref.ref_last_name}</h4>
               <span class="text-[9px] font-bold px-2 py-0.5 rounded ${getStatusBadgeClass(rawStatus)} uppercase">
                 ${formatStatusLabel(rawStatus)}
               </span>
@@ -904,7 +933,7 @@
             <p class="text-xs text-slate-500 mb-2">Email: ${ref.ref_email} | Phone: ${ref.ref_phone}</p>
             ${ref.notes ? `<p class="text-xs text-slate-600 italic bg-slate-50 p-2 rounded mb-3 border border-slate-100">📝 Notes: ${ref.notes}</p>` : ''}
             
-            <div class="p-2.5 bg-blue-50/80 rounded-lg border-l-4 border-blue-600 text-xs text-slate-700">
+            <div class="p-2.5 bg-c21gold-light rounded-lg border-l-4 border-c21gold text-xs text-slate-700">
               <span class="font-bold">Submitted By:</span> ${referrerName} (${referrerEmail})
             </div>
             ${actionButtons}
@@ -919,7 +948,7 @@
         case 'CLOSED_WON': case 'WON': return 'bg-emerald-600 text-white';
         case 'PENDING_BROKER_APPROVAL': return 'bg-amber-100 text-amber-800';
         case 'CLOSED_LOST': case 'REJECTED': case 'LOST': return 'bg-red-100 text-red-800';
-        default: return 'bg-blue-100 text-blue-800';
+        default: return 'bg-c21gold-light text-c21gold border border-c21gold-border';
       }
     }
 
