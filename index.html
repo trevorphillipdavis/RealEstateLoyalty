@@ -30,65 +30,74 @@
 </head>
 <body class="bg-slate-100 min-h-screen flex flex-col items-center justify-between font-sans pb-28 relative">
 
-  <!-- MAIN CONTAINER -->
+  <!-- MAIN CONTAINER WITH FIXED MAXIMUM HEIGHT -->
   <main class="w-full max-w-md p-4 flex-1 flex flex-col justify-center">
 
-    <!-- AUTH CARD (Shown when logged out - DEFAULT IS LOG IN) -->
-    <div id="auth-card" class="bg-white rounded-2xl shadow-xl p-6 border border-slate-200">
-      <div class="text-center mb-6">
-        <div class="inline-block bg-c21dark px-3 py-1 rounded-md mb-2">
-          <span class="text-c21gold font-extrabold text-xs tracking-widest uppercase">CENTURY 21</span>
+    <!-- AUTH CARD (Shown when logged out) -->
+    <div id="auth-card" class="bg-white rounded-2xl shadow-xl p-6 border border-slate-200 h-[520px] flex flex-col justify-between overflow-y-auto">
+      <div>
+        <div class="text-center mb-6">
+          <div class="flex justify-center mb-3">
+            <!-- CENTURY 21 GRAPHIC WITH BLANK/TRANSPARENT BACKGROUND -->
+            <img 
+              src="https://www.pngitem.com/pimgs/m/250-2501912_century-21-logo-png-logo-century-21-2018.png" 
+              alt="Century 21 Logo" 
+              class="h-12 object-contain mix-blend-multiply bg-transparent"
+              onerror="this.style.display='none'; document.getElementById('auth-c21-fallback').style.display='inline-block';"
+            />
+            <div id="auth-c21-fallback" class="hidden bg-c21dark px-3 py-1 rounded-md">
+              <span class="text-c21gold font-extrabold text-xs tracking-widest uppercase">CENTURY 21</span>
+            </div>
+          </div>
+
+          <h1 class="text-2xl font-bold text-c21dark" id="auth-title">Brokerage Rewards</h1>
+          <p class="text-slate-500 text-sm mt-1" id="auth-subtitle">Log in to view your account</p>
         </div>
-        <h1 class="text-2xl font-bold text-c21dark" id="auth-title">Brokerage Rewards</h1>
-        <p class="text-slate-500 text-sm mt-1" id="auth-subtitle">Log in to view your account</p>
+
+        <form id="auth-form" class="space-y-4" onsubmit="handleAuth(event)">
+          <div id="signup-extra-fields" class="hidden space-y-3">
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">First Name</label>
+                <input type="text" id="first-name-input" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-c21gold" placeholder="Jane">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Last Name</label>
+                <input type="text" id="last-name-input" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-c21gold" placeholder="Doe">
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Phone Number</label>
+              <input type="tel" id="phone-input" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-c21gold" placeholder="(555) 000-0000">
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Select Your Realtor (Optional)</label>
+              <select id="agent-select-input" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-c21gold bg-white text-xs">
+                <option value="">-- Assign directly to Broker --</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Email Address (Username)</label>
+            <input type="email" id="email-input" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-c21gold" placeholder="name@example.com">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Password</label>
+            <input type="password" id="password-input" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-c21gold" placeholder="••••••••">
+          </div>
+
+          <p id="auth-error" class="text-red-500 text-xs text-center hidden"></p>
+
+          <button type="submit" id="auth-submit-btn" class="w-full bg-c21dark hover:bg-black text-c21gold font-semibold py-2.5 rounded-lg transition-colors border border-c21gold/30">
+            Log In
+          </button>
+        </form>
       </div>
 
-      <form id="auth-form" class="space-y-4" onsubmit="handleAuth(event)">
-        <!-- Extra Fields for Sign Up Mode -->
-        <div id="signup-extra-fields" class="hidden space-y-3">
-          <div class="grid grid-cols-2 gap-2">
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">First Name</label>
-              <input type="text" id="first-name-input" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-c21gold" placeholder="Jane">
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">Last Name</label>
-              <input type="text" id="last-name-input" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-c21gold" placeholder="Doe">
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Phone Number</label>
-            <input type="tel" id="phone-input" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-c21gold" placeholder="(555) 000-0000">
-          </div>
-
-          <!-- AGENT SELECTION DROPDOWN -->
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Select Your Realtor (Optional)</label>
-            <select id="agent-select-input" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-c21gold bg-white text-xs">
-              <option value="">-- Assign directly to Broker --</option>
-            </select>
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Email Address (Username)</label>
-          <input type="email" id="email-input" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-c21gold" placeholder="name@example.com">
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Password</label>
-          <input type="password" id="password-input" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-c21gold" placeholder="••••••••">
-        </div>
-
-        <p id="auth-error" class="text-red-500 text-xs text-center hidden"></p>
-
-        <button type="submit" id="auth-submit-btn" class="w-full bg-c21dark hover:bg-black text-c21gold font-semibold py-2.5 rounded-lg transition-colors border border-c21gold/30">
-          Log In
-        </button>
-      </form>
-
-      <!-- Toggle option below to switch to Sign Up -->
       <div class="text-center mt-4">
         <button onclick="toggleAuthMode()" id="auth-toggle-btn" class="text-xs text-c21gold hover:underline font-semibold">
           Need an account? Sign Up
@@ -101,17 +110,27 @@
 
       <!-- HEADER CARD -->
       <div class="bg-c21dark rounded-2xl shadow-md p-4 border border-c21gold/20 flex justify-between items-center text-white">
-        <div>
-          <span class="text-[10px] font-extrabold text-c21gold tracking-widest uppercase block mb-0.5">CENTURY 21</span>
-          <h2 class="text-lg font-bold text-white" id="welcome-header">Welcome Back!</h2>
+        <div class="flex items-center gap-3">
+          <div class="bg-white p-1 rounded-lg flex items-center justify-center">
+            <img 
+              src="https://www.pngitem.com/pimgs/m/250-2501912_century-21-logo-png-logo-century-21-2018.png" 
+              alt="Century 21 Logo" 
+              class="h-7 object-contain mix-blend-multiply"
+              onerror="this.style.display='none'; document.getElementById('header-c21-fallback').style.display='block';"
+            />
+          </div>
+          <div>
+            <span id="header-c21-fallback" class="hidden text-[10px] font-extrabold text-c21gold tracking-widest uppercase block mb-0.5">CENTURY 21</span>
+            <h2 class="text-base font-bold text-white leading-tight" id="welcome-header">Welcome Back!</h2>
+          </div>
         </div>
         <button onclick="handleLogout()" class="text-xs bg-red-950/60 text-red-300 border border-red-800/40 px-3 py-1.5 rounded-lg hover:bg-red-900/80 font-semibold transition-colors">
           Log Out
         </button>
       </div>
 
-      <!-- TAB 1: REWARDS (CLIENT ONLY) -->
-      <section id="tab-rewards" class="tab-content hidden bg-white rounded-2xl shadow-sm p-6 border border-slate-200 space-y-4">
+      <!-- TAB 1: REWARDS (UNIFORM FIXED HEIGHT h-[520px]) -->
+      <section id="tab-rewards" class="tab-content hidden bg-white rounded-2xl shadow-sm p-6 border border-slate-200 h-[520px] overflow-y-auto space-y-4">
         <div class="border-2 border-dashed border-c21gold-border rounded-xl p-4 text-center bg-c21gold-light">
           <p class="text-xs font-semibold text-slate-600 uppercase tracking-wider">Current Balance</p>
           <p class="text-4xl font-extrabold text-c21dark my-1" id="points-balance">0</p>
@@ -139,20 +158,20 @@
         </form>
       </section>
 
-      <!-- TAB 2: MY REFERRALS (CLIENT ONLY) -->
-      <section id="tab-my-referrals" class="tab-content hidden bg-white rounded-2xl shadow-sm p-6 border border-slate-200 space-y-4">
+      <!-- TAB 2: MY REFERRALS (UNIFORM FIXED HEIGHT h-[520px]) -->
+      <section id="tab-my-referrals" class="tab-content hidden bg-white rounded-2xl shadow-sm p-6 border border-slate-200 h-[520px] overflow-y-auto space-y-4">
         <div class="text-center mb-2">
           <h3 class="text-xl font-bold text-c21dark">Submitted Referrals</h3>
           <p class="text-xs text-slate-500">Track status and earned rewards</p>
         </div>
         
-        <div id="client-referrals-container" class="min-h-[360px] max-h-[360px] overflow-y-auto pr-1 space-y-3">
+        <div id="client-referrals-container" class="space-y-3">
           <!-- Rendered dynamically -->
         </div>
       </section>
 
-      <!-- TAB 3: MY REALTOR (CLIENT ONLY) -->
-      <section id="tab-realtor" class="tab-content hidden bg-white rounded-2xl shadow-sm p-6 border border-slate-200 space-y-4">
+      <!-- TAB 3: MY REALTOR (UNIFORM FIXED HEIGHT h-[520px]) -->
+      <section id="tab-realtor" class="tab-content hidden bg-white rounded-2xl shadow-sm p-6 border border-slate-200 h-[520px] overflow-y-auto space-y-4">
         <div class="text-center mb-2">
           <h3 class="text-xl font-bold text-c21dark">My Assigned Realtor</h3>
           <p class="text-xs text-slate-500">Your dedicated Century 21 professional</p>
@@ -163,20 +182,19 @@
         </div>
       </section>
 
-      <!-- TAB 4: BROWSE HOMES -->
-      <section id="tab-homes" class="tab-content hidden bg-white rounded-2xl shadow-sm p-6 border border-slate-200">
+      <!-- TAB 4: BROWSE HOMES (UNIFORM FIXED HEIGHT h-[520px]) -->
+      <section id="tab-homes" class="tab-content hidden bg-white rounded-2xl shadow-sm p-6 border border-slate-200 h-[520px] overflow-y-auto">
         <h3 class="text-lg font-bold text-slate-900 mb-2">Featured Properties</h3>
         <p class="text-sm text-slate-500">Browse available homes in your area.</p>
       </section>
 
-      <!-- TAB 5: AGENT PORTAL (FOR AGENTS & BROKERS) -->
-      <section id="tab-agent" class="tab-content hidden bg-white rounded-2xl shadow-sm p-6 border border-slate-200 space-y-4">
+      <!-- TAB 5: AGENT PORTAL (UNIFORM FIXED HEIGHT h-[520px]) -->
+      <section id="tab-agent" class="tab-content hidden bg-white rounded-2xl shadow-sm p-6 border border-slate-200 h-[520px] overflow-y-auto space-y-4">
         <div class="text-center">
           <h3 class="text-xl font-bold text-c21dark">Agent Portal</h3>
           <p class="text-xs text-slate-500">Assigned Referral Pipeline</p>
         </div>
 
-        <!-- AGENT PORTAL SUB-TABS WITH TOTALS -->
         <div class="flex border-b border-slate-200 text-[11px] font-bold text-center">
           <button id="agent-subtab-btn-leads" onclick="switchAgentSubTab('leads')" class="flex-1 py-2 border-b-2 border-c21gold text-c21gold">
             Leads (<span id="count-leads">0</span>)
@@ -192,8 +210,7 @@
           </button>
         </div>
 
-        <!-- AGENT SUB-TAB FIXED HEIGHT CONTAINERS -->
-        <div class="min-h-[420px] max-h-[420px] overflow-y-auto pr-1">
+        <div class="pr-1">
           <div id="agent-subtab-leads" class="agent-subtab-content space-y-3"></div>
           <div id="agent-subtab-active" class="agent-subtab-content hidden space-y-3"></div>
           <div id="agent-subtab-won" class="agent-subtab-content hidden space-y-3"></div>
@@ -201,14 +218,13 @@
         </div>
       </section>
 
-      <!-- TAB 6: BROKERAGE MANAGEMENT -->
-      <section id="tab-broker" class="tab-content hidden bg-white rounded-2xl shadow-sm p-6 border border-slate-200 space-y-6">
+      <!-- TAB 6: BROKERAGE MANAGEMENT (UNIFORM FIXED HEIGHT h-[520px]) -->
+      <section id="tab-broker" class="tab-content hidden bg-white rounded-2xl shadow-sm p-6 border border-slate-200 h-[520px] overflow-y-auto space-y-6">
         <div class="text-center">
           <h3 class="text-xl font-bold text-c21dark">Brokerage Management</h3>
           <p class="text-xs text-slate-500">Approvals & Audit</p>
         </div>
 
-        <!-- BROKER APPROVAL SECTION FOR POINTS -->
         <div class="space-y-3">
           <h4 class="font-bold text-slate-800 text-sm flex items-center gap-1.5">
             <span>💎</span> Pending Points Approvals
@@ -220,25 +236,24 @@
 
         <hr class="border-slate-100" />
 
-        <!-- Broker Audit: Rejected / Closed Leads -->
         <div class="space-y-3">
           <h4 class="font-bold text-slate-800 text-sm flex items-center gap-1.5">
             <span>🚫</span> Rejected & Closed Leads
           </h4>
           <div id="broker-rejected-leads-container" class="space-y-3">
-            <!-- Rendered dynamically for Broker -->
+            <!-- Rendered dynamically -->
           </div>
         </div>
       </section>
 
-      <!-- TAB 7: LOCAL MARKET NEWS -->
-      <section id="tab-news" class="tab-content hidden bg-white rounded-2xl shadow-sm p-6 border border-slate-200 space-y-4">
+      <!-- TAB 7: LOCAL MARKET NEWS (UNIFORM FIXED HEIGHT h-[520px]) -->
+      <section id="tab-news" class="tab-content hidden bg-white rounded-2xl shadow-sm p-6 border border-slate-200 h-[520px] overflow-y-auto space-y-4">
         <div class="text-center mb-2">
           <h3 class="text-xl font-bold text-c21dark">Local Market News</h3>
           <p class="text-xs text-slate-500">Latest updates in real estate & mortgage trends</p>
         </div>
 
-        <div class="min-h-[380px] max-h-[380px] overflow-y-auto pr-1 space-y-4">
+        <div class="space-y-4">
           <article class="border border-slate-200 rounded-xl overflow-hidden bg-slate-50/50 shadow-sm">
             <div class="bg-c21dark h-24 flex items-center justify-center text-c21gold text-3xl">📈</div>
             <div class="p-3">
@@ -377,7 +392,6 @@
 
   <!-- APP JAVASCRIPT -->
   <script>
-    // SUPABASE INITIALIZATION
     const SUPABASE_URL = "https://pgudhthdmlcokwniuial.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBndWRodGhkbWxjb2t3bml1aWFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ1NTMxMTgsImV4cCI6MjEwMDEyOTExOH0.hZM89R6iIjBs6IVXDGRD0AwP4gF8ztdpxp73_x9sgyU";
 
@@ -387,27 +401,37 @@
     let currentUser = null;
     let currentUserRole = 'client';
     let currentUserAssignedAgentId = null;
+    let currentUserFirstName = '';
 
     // AUTH STATE LISTENER
     supabaseClient.auth.onAuthStateChange(async (event, session) => {
       if (session) {
         currentUser = session.user;
-        await fetchUserRole(currentUser.id);
+        await fetchUserRole(currentUser);
         renderAppUI();
       } else {
         currentUser = null;
         currentUserRole = 'client';
+        currentUserFirstName = '';
         renderAuthUI();
       }
     });
 
-    // FETCH USER ROLE, ASSIGNED AGENT, AND FULL NAME FOR HEADER
-    async function fetchUserRole(userId) {
+    // FETCH USER ROLE, ASSIGNED AGENT, AND FIRST NAME
+    async function fetchUserRole(user) {
+      currentUserFirstName = '';
+
+      if (user.user_metadata?.first_name) {
+        currentUserFirstName = user.user_metadata.first_name;
+      } else if (user.user_metadata?.full_name) {
+        currentUserFirstName = user.user_metadata.full_name.trim().split(' ')[0];
+      }
+
       try {
         const { data, error } = await supabaseClient
           .from('clients')
           .select('role, points, assigned_agent_id, full_name')
-          .eq('id', userId)
+          .eq('id', user.id)
           .maybeSingle();
 
         if (error) {
@@ -421,18 +445,20 @@
             document.getElementById('points-balance').innerText = data.points || 0;
           }
 
-          const headerEl = document.getElementById('welcome-header');
-          if (headerEl) {
-            let firstName = '';
-            if (data.full_name && data.full_name.trim() !== '') {
-              firstName = data.full_name.trim().split(' ')[0];
-            }
-            headerEl.innerText = firstName ? `Welcome Back, ${firstName}!` : 'Welcome Back!';
+          if (data.full_name && data.full_name.trim() !== '') {
+            currentUserFirstName = data.full_name.trim().split(' ')[0];
           }
         }
       } catch (err) {
         console.error("Failed to query clients table:", err);
         currentUserRole = 'client';
+      }
+
+      const headerEl = document.getElementById('welcome-header');
+      if (headerEl) {
+        headerEl.innerText = currentUserFirstName 
+          ? `Welcome Back, ${currentUserFirstName}!` 
+          : 'Welcome Back!';
       }
     }
 
@@ -503,7 +529,6 @@
       }
     }
 
-    // TOGGLE BETWEEN LOG IN AND SIGN UP
     function toggleAuthMode() {
       isSignUp = !isSignUp;
       document.getElementById('auth-title').innerText = isSignUp ? 'Create Client Account' : 'Brokerage Rewards';
@@ -547,7 +572,13 @@
 
         const { data, error } = await supabaseClient.auth.signUp({ 
           email: email, 
-          password: password 
+          password: password,
+          options: {
+            data: {
+              first_name: firstName,
+              full_name: fullName
+            }
+          }
         });
 
         if (error) {
@@ -629,7 +660,6 @@
       });
     }
 
-    // MODAL CONTROL FOR SUBMIT LEAD
     function openAgentLeadModal() {
       document.getElementById('agent-lead-modal').classList.remove('hidden');
     }
@@ -639,7 +669,6 @@
       document.getElementById('agent-lead-form').reset();
     }
 
-    // HANDLE SUBMIT LEAD BY AGENT
     async function handleAgentSubmitLead(e) {
       e.preventDefault();
       const firstName = document.getElementById('agent-lead-fn').value;
@@ -673,7 +702,6 @@
       }
     }
 
-    // SUBMIT REFERRAL BY CLIENT
     async function handleSubmitReferral(e) {
       e.preventDefault();
       const firstName = document.getElementById('ref-first-name').value;
@@ -700,7 +728,6 @@
       }
     }
 
-    // LOAD ASSIGNED REALTOR PROFILE FOR CLIENT (WITH CALL, TEXT & EMAIL BUTTONS)
     async function loadAssignedRealtor() {
       const container = document.getElementById('realtor-profile-container');
 
@@ -754,7 +781,6 @@
           </p>
         </div>
 
-        <!-- 3-BUTTON GRID: CALL, TEXT, EMAIL -->
         <div class="grid grid-cols-3 gap-2 pt-2">
           <a href="tel:${agent.phone || ''}" class="bg-c21dark hover:bg-black text-c21gold font-bold py-2 px-1 rounded-xl text-[11px] flex flex-col items-center justify-center gap-1 transition-colors border border-c21gold/30">
             <span>📞</span> Call
@@ -769,7 +795,6 @@
       `;
     }
 
-    // LOAD CLIENT SUBMITTED REFERRALS (GREEN "SUBMITTED" BADGE & ESTIMATED/AWARDED POINTS)
     async function loadClientReferrals() {
       const container = document.getElementById('client-referrals-container');
       container.innerHTML = `<p class="text-slate-400 text-center py-8 text-xs">Loading your referrals...</p>`;
@@ -822,7 +847,6 @@
       }).join('');
     }
 
-    // HELPER: FETCH CLIENT MAP FOR REFERRER DETAILS
     async function fetchClientsMap(clientIds) {
       if (!clientIds || clientIds.length === 0) return {};
       const { data } = await supabaseClient
@@ -843,7 +867,6 @@
       return 'Agent';
     }
 
-    // LOAD AGENT PORTAL PIPELINE
     async function loadAgentPortalData() {
       const { data: referrals, error } = await supabaseClient.from('referrals').select('*');
 
@@ -957,7 +980,6 @@
       return status || 'PENDING';
     }
 
-    // UPDATE STATUS WITH ERROR HANDLING
     async function updateLeadStatus(id, newStatus) {
       const { error } = await supabaseClient
         .from('referrals')
@@ -976,7 +998,6 @@
       }
     }
 
-    // HANDLE CLOSED/WON ACTION BY AGENT
     async function handleCloseWon(referralId, referrerClientId) {
       let referrerRole = 'agent';
       if (referrerClientId && referrerClientId !== 'undefined') {
@@ -999,7 +1020,6 @@
       }
     }
 
-    // BROKER VIEW DATA LOADING
     async function loadBrokerData() {
       await loadBrokerPendingApprovals();
       await loadBrokerRejectedLeads();
@@ -1043,7 +1063,6 @@
       }).join('');
     }
 
-    // BROKER APPROVES POINTS
     async function approvePointsForClient(referralId, clientId, currentPoints) {
       const { error: refErr } = await supabaseClient.from('referrals').update({ status: 'CLOSED_WON' }).eq('id', referralId);
       if (refErr) { alert("Error updating referral: " + refErr.message); return; }
@@ -1058,7 +1077,6 @@
       }
     }
 
-    // BROKER REJECTED / AUDIT VIEW
     async function loadBrokerRejectedLeads() {
       const container = document.getElementById('broker-rejected-leads-container');
       if (!container) return;
