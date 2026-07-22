@@ -416,7 +416,7 @@
 
   <!-- ALWAYS VISIBLE VERSION FOOTER -->
   <footer class="fixed bottom-0 left-0 right-0 bg-c21dark py-1 text-center border-t border-c21gold/20 z-50">
-    <p class="text-[10px] font-bold text-c21gold tracking-wider">CENTURY21 Global Connections Realty® v1.0.13</p>
+    <p class="text-[10px] font-bold text-c21gold tracking-wider">CENTURY21 Global Connections Realty® v1.0.14</p>
   </footer>
 
   <!-- APP JAVASCRIPT -->
@@ -677,7 +677,6 @@
         }
 
         if (data.user) {
-          // 1. Create client profile
           const { error: dbError } = await supabaseClient.from('clients').insert([{ 
             id: data.user.id, 
             email: email, 
@@ -692,7 +691,6 @@
             console.error("Error creating client profile record:", dbError.message);
           }
 
-          // 2. Check if this email matches an existing referral and link it
           const { data: matchedRef } = await supabaseClient
             .from('referrals')
             .select('id')
@@ -899,7 +897,6 @@
       `;
     }
 
-    // ACCOUNT ACTIVITY (BADGES DYNAMICALLY AS "Client ✓" IF CONVERTED, ELSE "Referral ✓")
     async function loadClientReferrals() {
       const container = document.getElementById('client-referrals-container');
       container.innerHTML = `<p class="text-slate-400 text-center py-8 text-xs">Loading activity records...</p>`;
@@ -1165,7 +1162,7 @@
       await loadBrokerRejectedLeads();
     }
 
-    // BROKER PENDING APPROVALS WITH ACCEPT / REJECT BUTTONS
+    // BROKER PENDING APPROVALS (CLOSED/WON POINTS AWARD)
     async function loadBrokerPendingApprovals() {
       const container = document.getElementById('broker-pending-approvals-container');
       container.innerHTML = `<p class="text-slate-400 text-center py-2 text-xs">Loading approvals...</p>`;
@@ -1258,33 +1255,33 @@
       }
     }
 
+    // BROKER REVIEW LEADS (FIXED QUERY TO FETCH PENDING_BROKER_REVIEW, REJECTED, CLOSED_LOST, LOST)
     async function loadBrokerRejectedLeads() {
       const container = document.getElementById('broker-rejected-leads-container');
       if (!container) return;
 
-      const { data: referrals, error } = await supabaseClient.from('referrals').select('*');
+      const { data: referrals, error } = await supabaseClient
+        .from('referrals')
+        .select('*')
+        .in('status', ['PENDING_BROKER_REVIEW', 'REJECTED', 'CLOSED_LOST', 'LOST']);
 
-      if (error || !referrals || referrals.length === 0) {
+      if (error) {
+        console.error("Error loading review leads:", error);
+        container.innerHTML = `<p class="text-red-500 text-center py-2 text-xs">Error loading leads.</p>`;
+        return;
+      }
+
+      if (!referrals || referrals.length === 0) {
         container.innerHTML = `<p class="text-slate-400 text-center py-2 text-xs">No pending review leads found.</p>`;
         return;
       }
 
-      const reviewLeads = referrals.filter(r => {
-        const s = (r.status || '').toUpperCase();
-        return s === 'PENDING_BROKER_REVIEW' || s === 'REJECTED' || s === 'CLOSED_LOST' || s === 'LOST';
-      });
-
-      if (reviewLeids.length === 0) {
-        container.innerHTML = `<p class="text-slate-400 text-center py-2 text-xs">No pending review leads found.</p>`;
-        return;
-      }
-
-      const clientIds = [...new Set(reviewLeads.map(r => r.referrer_client_id).filter(Boolean))];
+      const clientIds = [...new Set(referrals.map(r => r.referrer_client_id).filter(Boolean))];
       const clientsMap = await fetchClientsMap(clientIds);
       const assignedAgentIds = [...new Set(Object.values(clientsMap).map(c => c?.assigned_agent_id).filter(Boolean))];
       const agentsMap = await fetchClientsMap(assignedAgentIds);
 
-      container.innerHTML = reviewLeads.map(ref => {
+      container.innerHTML = referrals.map(ref => {
         const client = clientsMap[ref.referrer_client_id];
         const referrerName = getReferrerDisplayName(client);
         const isPendingReview = (ref.status || '').toUpperCase() === 'PENDING_BROKER_REVIEW';
@@ -1301,7 +1298,7 @@
           brokerActions = `
             <div class="grid grid-cols-2 gap-2 pt-2">
               <button onclick="openReassignModal('${ref.id}')" class="bg-c21dark hover:bg-black text-c21gold font-semibold py-2 rounded-lg text-xs border border-c21gold/30">
-                🔄 Re-agent Agent
+                🔄 Re-assign Agent
               </button>
               <button onclick="brokerCloseAsLost('${ref.id}')" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 rounded-lg text-xs">
                 ❌ Closed/Lost
