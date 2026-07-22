@@ -34,10 +34,10 @@
   <main class="w-full max-w-md p-4 flex-1 flex flex-col justify-center">
 
     <!-- AUTH CARD (Shown when logged out) -->
-    <div id="auth-card" class="bg-white rounded-2xl shadow-xl p-6 border border-slate-200 h-[520px] flex flex-col justify-between overflow-y-auto">
+    <div id="auth-card" class="bg-white rounded-2xl shadow-xl p-6 border border-slate-200 h-[560px] flex flex-col justify-between overflow-y-auto">
       <div>
-        <div class="text-center mb-6">
-          <div class="flex flex-col items-center justify-center mb-3">
+        <div class="text-center mb-4">
+          <div class="flex flex-col items-center justify-center mb-2">
             <img 
               src="https://upload.wikimedia.org/wikipedia/commons/c/c2/Century_21_Real_Estate_logo.svg" 
               alt="Century21 Logo" 
@@ -50,11 +50,16 @@
           </div>
 
           <h1 class="text-2xl font-bold text-c21dark" id="auth-title">Brokerage Rewards</h1>
-          <p class="text-slate-500 text-sm mt-1" id="auth-subtitle">Log in to view your account</p>
+          <p class="text-slate-500 text-sm mt-0.5" id="auth-subtitle">Log in to view your account</p>
         </div>
 
-        <form id="auth-form" class="space-y-4" onsubmit="handleAuth(event)">
-          <div id="signup-extra-fields" class="hidden space-y-3">
+        <!-- CUSTOM PWA INSTALL APP BUTTON -->
+        <button id="pwa-install-btn" type="button" class="hidden w-full mb-4 bg-c21gold hover:bg-c21gold-hover text-c21dark font-bold py-2 px-3 rounded-lg text-xs flex items-center justify-center gap-2 transition-colors border border-c21gold-border shadow-sm">
+          <span>📱</span> Install App to Home Screen
+        </button>
+
+        <form id="auth-form" class="space-y-3" onsubmit="handleAuth(event)">
+          <div id="signup-extra-fields" class="hidden space-y-2.5">
             <div class="grid grid-cols-2 gap-2">
               <div>
                 <label class="block text-xs font-semibold text-slate-600 mb-1">First Name</label>
@@ -97,7 +102,7 @@
         </form>
       </div>
 
-      <div class="text-center mt-4">
+      <div class="text-center mt-3">
         <button onclick="toggleAuthMode()" id="auth-toggle-btn" class="text-xs text-c21gold hover:underline font-semibold">
           Need an account? Sign Up
         </button>
@@ -187,7 +192,7 @@
         <p class="text-sm text-slate-500">Browse available homes in your area.</p>
       </section>
 
-      <!-- TAB 5: AGENT / BROKER PORTAL -->
+      <!-- TAB 5: AGENT PORTAL -->
       <section id="tab-agent" class="tab-content hidden bg-white rounded-2xl shadow-sm p-6 border border-slate-200 h-[520px] overflow-y-auto space-y-4">
         <div class="text-center">
           <h3 class="text-xl font-bold text-c21dark" id="portal-title-header">Agent Portal</h3>
@@ -221,9 +226,10 @@
       <section id="tab-broker" class="tab-content hidden bg-white rounded-2xl shadow-sm p-6 border border-slate-200 h-[520px] overflow-y-auto space-y-6">
         <div class="text-center">
           <h3 class="text-xl font-bold text-c21dark">Brokerage Management</h3>
-          <p class="text-xs text-slate-500">Approvals & Audit</p>
+          <p class="text-xs text-slate-500">Approvals & Re-assignment Review</p>
         </div>
 
+        <!-- BROKER APPROVAL SECTION FOR POINTS -->
         <div class="space-y-3">
           <h4 class="font-bold text-slate-800 text-sm flex items-center gap-1.5">
             <span>💎</span> Pending Points Approvals
@@ -233,9 +239,10 @@
 
         <hr class="border-slate-100" />
 
+        <!-- BROKER REVIEW SECTION FOR REJECTED LEADS -->
         <div class="space-y-3">
           <h4 class="font-bold text-slate-800 text-sm flex items-center gap-1.5">
-            <span>🚫</span> Rejected & Closed Leads
+            <span>🔄</span> Review Leads (Rejected / Closed-Lost)
           </h4>
           <div id="broker-rejected-leads-container" class="space-y-3"></div>
         </div>
@@ -293,9 +300,36 @@
     </div>
   </main>
 
+  <!-- RE-ASSIGN AGENT MODAL POPUP FOR BROKER -->
+  <div id="broker-reassign-modal" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 space-y-4 border border-slate-200 relative">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+        <h3 class="font-bold text-c21dark text-base flex items-center gap-2">
+          <span>🔄</span> Re-assign Lead
+        </h3>
+        <button onclick="closeReassignModal()" class="text-slate-400 hover:text-slate-600 font-bold text-lg">&times;</button>
+      </div>
+      <input type="hidden" id="reassign-referral-id" />
+      <div class="space-y-3">
+        <label class="block text-xs font-semibold text-slate-600">Select New Agent to Review Lead</label>
+        <select id="broker-agent-reassign-select" class="w-full px-3 py-2 border rounded-lg text-xs bg-white focus:ring-2 focus:ring-c21gold">
+          <!-- Populated dynamically -->
+        </select>
+        <div class="pt-2 flex gap-2">
+          <button type="button" onclick="closeReassignModal()" class="w-1/2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-lg text-xs">
+            Cancel
+          </button>
+          <button type="button" onclick="confirmReassignLead()" class="w-1/2 bg-c21dark hover:bg-black text-c21gold font-semibold py-2.5 rounded-lg text-xs border border-c21gold/30">
+            Re-assign Lead
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- SUBMIT LEAD MODAL POPUP -->
   <div id="agent-lead-modal" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 space-y-4 border border-slate-200 relative animate-in fade-in zoom-in duration-150">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 space-y-4 border border-slate-200 relative">
       <div class="flex justify-between items-center border-b border-slate-100 pb-3">
         <h3 class="font-bold text-c21dark text-base flex items-center gap-2">
           <span>🏠</span> Submit New Lead
@@ -382,7 +416,7 @@
 
   <!-- ALWAYS VISIBLE VERSION FOOTER -->
   <footer class="fixed bottom-0 left-0 right-0 bg-c21dark py-1 text-center border-t border-c21gold/20 z-50">
-    <p class="text-[10px] font-bold text-c21gold tracking-wider">CENTURY21 Global Connections Realty® v1.0.5</p>
+    <p class="text-[10px] font-bold text-c21gold tracking-wider">CENTURY21 Global Connections Realty® v1.0.9</p>
   </footer>
 
   <!-- APP JAVASCRIPT -->
@@ -397,6 +431,30 @@
     let currentUserRole = 'client';
     let currentUserAssignedAgentId = null;
     let currentUserFirstName = '';
+    let deferredPwaPrompt = null;
+
+    // PWA INSTALL PROMPT EVENT LISTENER
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPwaPrompt = e;
+      const installBtn = document.getElementById('pwa-install-btn');
+      if (installBtn) installBtn.classList.remove('hidden');
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const installBtn = document.getElementById('pwa-install-btn');
+      if (installBtn) {
+        installBtn.addEventListener('click', async () => {
+          if (!deferredPwaPrompt) return;
+          deferredPwaPrompt.prompt();
+          const { outcome } = await deferredPwaPrompt.userChoice;
+          if (outcome === 'accepted') {
+            installBtn.classList.add('hidden');
+          }
+          deferredPwaPrompt = null;
+        });
+      }
+    });
 
     // UNIFIED HELPER: GENERATES UNIFORM POINT BADGES FOR ALL VIEWS
     function renderPointBadge(status) {
@@ -516,9 +574,9 @@
         myReferralsNav.classList.add('hidden');
         realtorNav.classList.add('hidden');
         agentNav.classList.remove('hidden');
-        if (navAgentLabel) navAgentLabel.innerText = 'Broker Portal';
-        if (portalTitleHeader) portalTitleHeader.innerText = 'Broker Portal';
-        if (portalSubtitleHeader) portalSubtitleHeader.innerText = 'Brokerage Referral Pipeline & Oversight';
+        if (navAgentLabel) navAgentLabel.innerText = 'Agent Portal';
+        if (portalTitleHeader) portalTitleHeader.innerText = 'Agent Portal';
+        if (portalSubtitleHeader) portalSubtitleHeader.innerText = 'Assigned Referral Pipeline';
         submitLeadNav.classList.remove('hidden');
         brokerNav.classList.remove('hidden');
         switchTab('tab-agent');
@@ -896,7 +954,6 @@
       const clientIds = [...new Set((referrals || []).map(r => r.referrer_client_id).filter(Boolean))];
       const clientsMap = await fetchClientsMap(clientIds);
 
-      // Gather all assigned agent IDs to fetch their names for broker view
       const assignedAgentIds = [...new Set(Object.values(clientsMap).map(c => c?.assigned_agent_id).filter(Boolean))];
       const agentsMap = await fetchClientsMap(assignedAgentIds);
 
@@ -917,7 +974,7 @@
 
       const lost = (referrals || []).filter(r => {
         const s = (r.status || '').toUpperCase();
-        return s === 'REJECTED' || s === 'CLOSED_LOST' || s === 'LOST';
+        return s === 'REJECTED' || s === 'CLOSED_LOST' || s === 'LOST' || s === 'PENDING_BROKER_REVIEW';
       });
 
       document.getElementById('count-leads').innerText = leads.length;
@@ -944,7 +1001,6 @@
         const referrerEmail = client?.email || 'N/A';
         const rawStatus = (ref.status || 'PENDING').toUpperCase();
 
-        // Find assigned agent name if user is broker
         let assignedAgentLine = '';
         if (currentUserRole === 'broker' && client?.assigned_agent_id) {
           const assignedAgentObj = agentsMap[client.assigned_agent_id];
@@ -963,7 +1019,7 @@
               <button onclick="updateLeadStatus('${ref.id}', 'ACCEPTED')" class="bg-c21dark hover:bg-black text-c21gold font-semibold py-2 rounded-lg text-xs border border-c21gold/30">
                 Accept Lead ✓
               </button>
-              <button onclick="updateLeadStatus('${ref.id}', 'REJECTED')" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 rounded-lg text-xs">
+              <button onclick="handleAgentRejectLead('${ref.id}')" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 rounded-lg text-xs">
                 Reject Lead ✕
               </button>
             </div>`;
@@ -973,7 +1029,7 @@
               <button onclick="handleCloseWon('${ref.id}', '${ref.referrer_client_id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 rounded-lg text-xs">
                 Closed / Won 🎉
               </button>
-              <button onclick="updateLeadStatus('${ref.id}', 'CLOSED_LOST')" class="bg-slate-600 hover:bg-slate-700 text-white font-semibold py-2 rounded-lg text-xs">
+              <button onclick="handleActiveCloseLost('${ref.id}')" class="bg-slate-600 hover:bg-slate-700 text-white font-semibold py-2 rounded-lg text-xs">
                 Closed / Lost ❌
               </button>
             </div>`;
@@ -1008,6 +1064,7 @@
         case 'ACCEPTED': case 'ACTIVE': return 'bg-emerald-100 text-emerald-800';
         case 'CLOSED_WON': case 'WON': return 'bg-emerald-600 text-white';
         case 'PENDING_BROKER_APPROVAL': return 'bg-amber-100 text-amber-800';
+        case 'PENDING_BROKER_REVIEW': return 'bg-orange-100 text-orange-800';
         case 'CLOSED_LOST': case 'REJECTED': case 'LOST': return 'bg-red-100 text-red-800';
         default: return 'bg-c21gold-light text-c21gold border border-c21gold-border';
       }
@@ -1016,9 +1073,42 @@
     function formatStatusLabel(status) {
       const s = (status || 'PENDING').toUpperCase();
       if (s === 'PENDING_BROKER_APPROVAL') return 'Awaiting Broker Approval';
+      if (s === 'PENDING_BROKER_REVIEW') return 'Needs Broker Review';
       if (s === 'CLOSED_WON' || s === 'WON') return 'Closed/Won';
       if (s === 'CLOSED_LOST' || s === 'REJECTED' || s === 'LOST') return 'Closed/Lost';
       return s;
+    }
+
+    // AGENT REJECTS NEW LEAD -> ROUTES TO BROKER REVIEW
+    async function handleAgentRejectLead(id) {
+      const { error } = await supabaseClient
+        .from('referrals')
+        .update({ status: 'PENDING_BROKER_REVIEW' })
+        .eq('id', id);
+
+      if (error) {
+        alert("Error rejecting lead: " + error.message);
+      } else {
+        alert("Lead rejected and forwarded to Broker for re-assignment or closing.");
+        await loadAgentPortalData();
+        switchAgentSubTab('lost');
+      }
+    }
+
+    // ACTIVE LEAD SET TO CLOSED/LOST -> ROUTES TO BROKER REVIEW
+    async function handleActiveCloseLost(id) {
+      const { error } = await supabaseClient
+        .from('referrals')
+        .update({ status: 'PENDING_BROKER_REVIEW' })
+        .eq('id', id);
+
+      if (error) {
+        alert("Error setting lead to closed/lost: " + error.message);
+      } else {
+        alert("Lead marked as Closed/Lost and forwarded to Broker for review.");
+        await loadAgentPortalData();
+        switchAgentSubTab('lost');
+      }
     }
 
     async function updateLeadStatus(id, newStatus) {
@@ -1039,24 +1129,18 @@
       }
     }
 
+    // ACTIVE LEAD SET TO CLOSED/WON -> ROUTES TO BROKER APPROVAL
     async function handleCloseWon(referralId, referrerClientId) {
-      let referrerRole = 'agent';
-      if (referrerClientId && referrerClientId !== 'undefined') {
-        const { data } = await supabaseClient.from('clients').select('role').eq('id', referrerClientId).maybeSingle();
-        if (data) referrerRole = data.role;
-      }
+      const { error } = await supabaseClient
+        .from('referrals')
+        .update({ status: 'PENDING_BROKER_APPROVAL' })
+        .eq('id', referralId);
 
-      if (referrerRole === 'client') {
-        const { error } = await supabaseClient.from('referrals').update({ status: 'PENDING_BROKER_APPROVAL' }).eq('id', referralId);
-        if (error) {
-          alert("Error: " + error.message);
-        } else {
-          alert("Lead marked as Closed/Won! Sent to Broker to approve points award.");
-          await loadAgentPortalData();
-          switchAgentSubTab('won');
-        }
+      if (error) {
+        alert("Error: " + error.message);
       } else {
-        await updateLeadStatus(referralId, 'CLOSED_WON');
+        alert("Lead marked as Closed/Won! Sent to Broker for review & points assignment.");
+        await loadAgentPortalData();
         switchAgentSubTab('won');
       }
     }
@@ -1066,6 +1150,7 @@
       await loadBrokerRejectedLeads();
     }
 
+    // BROKER APPROVAL FOR CLOSED/WON POINTS
     async function loadBrokerPendingApprovals() {
       const container = document.getElementById('broker-pending-approvals-container');
       container.innerHTML = `<p class="text-slate-400 text-center py-2 text-xs">Loading approvals...</p>`;
@@ -1088,6 +1173,7 @@
       container.innerHTML = referrals.map(ref => {
         const client = clientsMap[ref.referrer_client_id];
         const referrerName = getReferrerDisplayName(client);
+        const referrerRole = client?.role || 'client';
 
         let assignedAgentLine = '';
         if (client?.assigned_agent_id) {
@@ -1095,6 +1181,16 @@
           const assignedAgentName = (assignedAgentObj?.full_name && assignedAgentObj.full_name.trim()) ? assignedAgentObj.full_name : (assignedAgentObj?.email || 'Brokerage');
           assignedAgentLine = `<div><span class="font-bold text-slate-900">Assigned Agent:</span> ${assignedAgentName}</div>`;
         }
+
+        // Rule: If submitted by an agent, no points awarded anywhere
+        const pointActionUI = referrerRole === 'agent' || referrerRole === 'broker'
+          ? `<div class="p-2 bg-slate-100 rounded text-xs text-slate-600 italic">Submitted by an agent. No points awarded.</div>
+             <button onclick="approvePointsForClient('${ref.id}', '${ref.referrer_client_id}', 0, true)" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-2 rounded-lg text-xs mt-2">
+               Approve Closed/Won (No Points) ✓
+             </button>`
+          : `<button onclick="approvePointsForClient('${ref.id}', '${ref.referrer_client_id}', ${client?.points || 0}, false)" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg text-xs mt-2">
+               Approve & Award 100 Points to Client 💎
+             </button>`;
 
         return `
           <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 shadow-sm space-y-2">
@@ -1103,32 +1199,36 @@
               <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-amber-600 text-white uppercase">Needs Approval</span>
             </div>
             <div class="text-xs text-slate-600 space-y-1">
-              <div>Submitted by Client: <span class="font-semibold">${referrerName} (${client?.email || ''})</span></div>
+              <div>Submitted by: <span class="font-semibold">${referrerName} (${client?.email || ''}) - [${referrerRole.toUpperCase()}]</span></div>
               ${assignedAgentLine}
             </div>
             ${renderPointBadge(ref.status)}
-            <button onclick="approvePointsForClient('${ref.id}', '${ref.referrer_client_id}', ${client?.points || 0})" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg text-xs mt-2">
-              Approve & Award Points 💎
-            </button>
+            ${pointActionUI}
           </div>
         `;
       }).join('');
     }
 
-    async function approvePointsForClient(referralId, clientId, currentPoints) {
+    async function approvePointsForClient(referralId, clientId, currentPoints, isAgentSubmission) {
       const { error: refErr } = await supabaseClient.from('referrals').update({ status: 'CLOSED_WON' }).eq('id', referralId);
       if (refErr) { alert("Error updating referral: " + refErr.message); return; }
 
-      const newPoints = (currentPoints || 0) + 100;
-      const { error: clientErr } = await supabaseClient.from('clients').update({ points: newPoints }).eq('id', clientId);
-
-      if (clientErr) alert("Error awarding points: " + clientErr.message);
-      else {
-        alert("Approved! 100 points awarded to the client.");
-        loadBrokerData();
+      if (!isAgentSubmission && clientId) {
+        const newPoints = (currentPoints || 0) + 100;
+        const { error: clientErr } = await supabaseClient.from('clients').update({ points: newPoints }).eq('id', clientId);
+        if (clientErr) {
+          alert("Error awarding points: " + clientErr.message);
+          return;
+        }
+        alert("Approved! 100 points awarded to the referring client.");
+      } else {
+        alert("Approved! Marked as Closed/Won (Agent submission - no points awarded).");
       }
+
+      loadBrokerData();
     }
 
+    // LOAD PENDING REVIEW LEADS FOR BROKER (REJECTED OR ACTIVE SET TO CLOSED/LOST)
     async function loadBrokerRejectedLeads() {
       const container = document.getElementById('broker-rejected-leads-container');
       if (!container) return;
@@ -1136,28 +1236,29 @@
       const { data: referrals, error } = await supabaseClient.from('referrals').select('*');
 
       if (error || !referrals || referrals.length === 0) {
-        container.innerHTML = `<p class="text-slate-400 text-center py-2 text-xs">No rejected or lost leads found.</p>`;
+        container.innerHTML = `<p class="text-slate-400 text-center py-2 text-xs">No pending review leads found.</p>`;
         return;
       }
 
-      const rejectedOrLost = referrals.filter(r => {
+      const reviewLeads = referrals.filter(r => {
         const s = (r.status || '').toUpperCase();
-        return s === 'REJECTED' || s === 'CLOSED_LOST' || s === 'LOST';
+        return s === 'PENDING_BROKER_REVIEW' || s === 'REJECTED' || s === 'CLOSED_LOST' || s === 'LOST';
       });
 
-      if (rejectedOrLost.length === 0) {
-        container.innerHTML = `<p class="text-slate-400 text-center py-2 text-xs">No rejected or lost leads found.</p>`;
+      if (reviewLeads.length === 0) {
+        container.innerHTML = `<p class="text-slate-400 text-center py-2 text-xs">No pending review leads found.</p>`;
         return;
       }
 
-      const clientIds = [...new Set(rejectedOrLost.map(r => r.referrer_client_id).filter(Boolean))];
+      const clientIds = [...new Set(reviewLeads.map(r => r.referrer_client_id).filter(Boolean))];
       const clientsMap = await fetchClientsMap(clientIds);
       const assignedAgentIds = [...new Set(Object.values(clientsMap).map(c => c?.assigned_agent_id).filter(Boolean))];
       const agentsMap = await fetchClientsMap(assignedAgentIds);
 
-      container.innerHTML = rejectedOrLost.map(ref => {
+      container.innerHTML = reviewLeads.map(ref => {
         const client = clientsMap[ref.referrer_client_id];
         const referrerName = getReferrerDisplayName(client);
+        const isPendingReview = (ref.status || '').toUpperCase() === 'PENDING_BROKER_REVIEW';
 
         let assignedAgentLine = '';
         if (client?.assigned_agent_id) {
@@ -1166,11 +1267,25 @@
           assignedAgentLine = `<div><span class="font-bold text-slate-900">Assigned Agent:</span> ${assignedAgentName}</div>`;
         }
 
+        let brokerActions = '';
+        if (isPendingReview) {
+          brokerActions = `
+            <div class="grid grid-cols-2 gap-2 pt-2">
+              <button onclick="openReassignModal('${ref.id}')" class="bg-c21dark hover:bg-black text-c21gold font-semibold py-2 rounded-lg text-xs border border-c21gold/30">
+                🔄 Re-assign Agent
+              </button>
+              <button onclick="brokerCloseAsLost('${ref.id}')" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 rounded-lg text-xs">
+                ❌ Closed/Lost
+              </button>
+            </div>
+          `;
+        }
+
         return `
-          <div class="bg-red-50/50 border border-red-200 rounded-xl p-3 shadow-sm space-y-2">
+          <div class="bg-red-50/60 border border-red-200 rounded-xl p-3 shadow-sm space-y-2">
             <div class="flex justify-between items-center mb-1">
               <h5 class="text-sm font-bold text-slate-800">🏠 ${ref.ref_first_name} ${ref.ref_last_name}</h5>
-              <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-red-600 text-white uppercase">${formatStatusLabel(ref.status)}</span>
+              <span class="text-[9px] font-bold px-2 py-0.5 rounded ${getStatusBadgeClass(ref.status)} uppercase">${formatStatusLabel(ref.status)}</span>
             </div>
             <p class="text-xs text-slate-500 mb-1">Email: ${ref.ref_email} | Phone: ${ref.ref_phone}</p>
             <div class="text-xs text-slate-600 space-y-1">
@@ -1178,9 +1293,82 @@
               ${assignedAgentLine}
             </div>
             ${renderPointBadge(ref.status)}
+            ${brokerActions}
           </div>
         `;
       }).join('');
+    }
+
+    async function openReassignModal(referralId) {
+      document.getElementById('reassign-referral-id').value = referralId;
+      const selectEl = document.getElementById('broker-agent-reassign-select');
+      
+      const { data: agents } = await supabaseClient
+        .from('clients')
+        .select('id, full_name, email, role')
+        .in('role', ['agent', 'broker']);
+
+      selectEl.innerHTML = `<option value="">-- Select New Agent --</option>`;
+      if (agents && agents.length > 0) {
+        agents.forEach(ag => {
+          const name = (ag.full_name && ag.full_name.trim()) ? ag.full_name : ag.email;
+          const roleBadge = ag.role === 'broker' ? ' (Broker)' : ' (Agent)';
+          selectEl.innerHTML += `<option value="${ag.id}">${name}${roleBadge}</option>`;
+        });
+      }
+
+      document.getElementById('broker-reassign-modal').classList.remove('hidden');
+    }
+
+    function closeReassignModal() {
+      document.getElementById('broker-reassign-modal').classList.add('hidden');
+      document.getElementById('reassign-referral-id').value = '';
+    }
+
+    async function confirmReassignLead() {
+      const referralId = document.getElementById('reassign-referral-id').value;
+      const newAgentId = document.getElementById('broker-agent-reassign-select').value;
+
+      if (!newAgentId) {
+        alert("Please select an agent to re-assign.");
+        return;
+      }
+
+      const { error: refErr } = await supabaseClient
+        .from('referrals')
+        .update({ status: 'PENDING' })
+        .eq('id', referralId);
+
+      if (refErr) {
+        alert("Error updating referral: " + refErr.message);
+        return;
+      }
+
+      const { data: refData } = await supabaseClient.from('referrals').select('referrer_client_id').eq('id', referralId).maybeSingle();
+      if (refData?.referrer_client_id) {
+        await supabaseClient
+          .from('clients')
+          .update({ assigned_agent_id: newAgentId })
+          .eq('id', refData.referrer_client_id);
+      }
+
+      alert("Lead successfully re-assigned to the new agent!");
+      closeReassignModal();
+      loadBrokerData();
+    }
+
+    async function brokerCloseAsLost(referralId) {
+      const { error } = await supabaseClient
+        .from('referrals')
+        .update({ status: 'CLOSED_LOST' })
+        .eq('id', referralId);
+
+      if (error) {
+        alert("Error updating lead: " + error.message);
+      } else {
+        alert("Lead marked as Closed/Lost.");
+        loadBrokerData();
+      }
     }
   </script>
 </body>
