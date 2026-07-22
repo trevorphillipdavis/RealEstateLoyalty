@@ -222,10 +222,10 @@
         </div>
       </section>
 
-      <!-- TAB 6: BROKERAGE MANAGEMENT -->
+      <!-- TAB 6: CLIENT MANAGEMENT -->
       <section id="tab-broker" class="tab-content hidden bg-white rounded-2xl shadow-sm p-6 border border-slate-200 h-[520px] overflow-y-auto space-y-6">
         <div class="text-center">
-          <h3 class="text-xl font-bold text-c21dark">Brokerage Management</h3>
+          <h3 class="text-xl font-bold text-c21dark">Client Management</h3>
           <p class="text-xs text-slate-500">Approvals & Re-assignment Review</p>
         </div>
 
@@ -409,14 +409,14 @@
       </button>
       <button id="nav-broker-btn" onclick="switchTab('tab-broker')" class="nav-btn hidden text-slate-400 flex flex-col items-center">
         <span class="text-base">👑</span>
-        <span class="text-[9px] font-semibold">Brokerage</span>
+        <span class="text-[9px] font-semibold" id="nav-broker-nav-label">Client Management</span>
       </button>
     </div>
   </nav>
 
   <!-- ALWAYS VISIBLE VERSION FOOTER -->
   <footer class="fixed bottom-0 left-0 right-0 bg-c21dark py-1 text-center border-t border-c21gold/20 z-50">
-    <p class="text-[10px] font-bold text-c21gold tracking-wider">CENTURY21 Global Connections Realty® v1.0.9</p>
+    <p class="text-[10px] font-bold text-c21gold tracking-wider">CENTURY21 Global Connections Realty® v1.0.12</p>
   </footer>
 
   <!-- APP JAVASCRIPT -->
@@ -1063,8 +1063,7 @@
       switch (s) {
         case 'ACCEPTED': case 'ACTIVE': return 'bg-emerald-100 text-emerald-800';
         case 'CLOSED_WON': case 'WON': return 'bg-emerald-600 text-white';
-        case 'PENDING_BROKER_APPROVAL': return 'bg-amber-100 text-amber-800';
-        case 'PENDING_BROKER_REVIEW': return 'bg-orange-100 text-orange-800';
+        case 'PENDING_BROKER_APPROVAL': case 'PENDING_BROKER_REVIEW': return 'bg-amber-100 text-amber-800';
         case 'CLOSED_LOST': case 'REJECTED': case 'LOST': return 'bg-red-100 text-red-800';
         default: return 'bg-c21gold-light text-c21gold border border-c21gold-border';
       }
@@ -1072,14 +1071,12 @@
 
     function formatStatusLabel(status) {
       const s = (status || 'PENDING').toUpperCase();
-      if (s === 'PENDING_BROKER_APPROVAL') return 'Awaiting Broker Approval';
-      if (s === 'PENDING_BROKER_REVIEW') return 'Needs Broker Review';
+      if (s === 'PENDING_BROKER_APPROVAL' || s === 'PENDING_BROKER_REVIEW') return 'Needs Broker Approval';
       if (s === 'CLOSED_WON' || s === 'WON') return 'Closed/Won';
       if (s === 'CLOSED_LOST' || s === 'REJECTED' || s === 'LOST') return 'Closed/Lost';
       return s;
     }
 
-    // AGENT REJECTS NEW LEAD -> ROUTES TO BROKER REVIEW
     async function handleAgentRejectLead(id) {
       const { error } = await supabaseClient
         .from('referrals')
@@ -1095,7 +1092,6 @@
       }
     }
 
-    // ACTIVE LEAD SET TO CLOSED/LOST -> ROUTES TO BROKER REVIEW
     async function handleActiveCloseLost(id) {
       const { error } = await supabaseClient
         .from('referrals')
@@ -1129,7 +1125,6 @@
       }
     }
 
-    // ACTIVE LEAD SET TO CLOSED/WON -> ROUTES TO BROKER APPROVAL
     async function handleCloseWon(referralId, referrerClientId) {
       const { error } = await supabaseClient
         .from('referrals')
@@ -1150,7 +1145,7 @@
       await loadBrokerRejectedLeads();
     }
 
-    // BROKER APPROVAL FOR CLOSED/WON POINTS
+    // BROKER PENDING APPROVALS (CLOSED/WON POINTS AWARD)
     async function loadBrokerPendingApprovals() {
       const container = document.getElementById('broker-pending-approvals-container');
       container.innerHTML = `<p class="text-slate-400 text-center py-2 text-xs">Loading approvals...</p>`;
@@ -1182,28 +1177,29 @@
           assignedAgentLine = `<div><span class="font-bold text-slate-900">Assigned Agent:</span> ${assignedAgentName}</div>`;
         }
 
-        // Rule: If submitted by an agent, no points awarded anywhere
-        const pointActionUI = referrerRole === 'agent' || referrerRole === 'broker'
-          ? `<div class="p-2 bg-slate-100 rounded text-xs text-slate-600 italic">Submitted by an agent. No points awarded.</div>
-             <button onclick="approvePointsForClient('${ref.id}', '${ref.referrer_client_id}', 0, true)" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-2 rounded-lg text-xs mt-2">
-               Approve Closed/Won (No Points) ✓
-             </button>`
-          : `<button onclick="approvePointsForClient('${ref.id}', '${ref.referrer_client_id}', ${client?.points || 0}, false)" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg text-xs mt-2">
-               Approve & Award 100 Points to Client 💎
-             </button>`;
+        const isAgentSub = referrerRole === 'agent' || referrerRole === 'broker';
 
         return `
           <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 shadow-sm space-y-2">
             <div class="flex justify-between items-center">
               <h5 class="text-sm font-bold text-slate-800">🏠 ${ref.ref_first_name} ${ref.ref_last_name}</h5>
-              <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-amber-600 text-white uppercase">Needs Approval</span>
+              <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-amber-600 text-white uppercase">${formatStatusLabel(ref.status)}</span>
             </div>
             <div class="text-xs text-slate-600 space-y-1">
               <div>Submitted by: <span class="font-semibold">${referrerName} (${client?.email || ''}) - [${referrerRole.toUpperCase()}]</span></div>
               ${assignedAgentLine}
             </div>
             ${renderPointBadge(ref.status)}
-            ${pointActionUI}
+            
+            <!-- ACCEPT OR REJECT BUTTONS FOR BROKER -->
+            <div class="grid grid-cols-2 gap-2 pt-2">
+              <button onclick="approvePointsForClient('${ref.id}', '${ref.referrer_client_id}', ${client?.points || 0}, ${isAgentSub})" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg text-xs">
+                Accept 💎
+              </button>
+              <button onclick="rejectPendingApproval('${ref.id}')" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded-lg text-xs">
+                Reject ✕
+              </button>
+            </div>
           </div>
         `;
       }).join('');
@@ -1220,12 +1216,26 @@
           alert("Error awarding points: " + clientErr.message);
           return;
         }
-        alert("Approved! 100 points awarded to the referring client.");
+        alert("Accepted! 100 points awarded to the referral and referrer.");
       } else {
-        alert("Approved! Marked as Closed/Won (Agent submission - no points awarded).");
+        alert("Accepted! Marked as Closed/Won (Agent submission - no points awarded).");
       }
 
       loadBrokerData();
+    }
+
+    async function rejectPendingApproval(referralId) {
+      const { error } = await supabaseClient
+        .from('referrals')
+        .update({ status: 'ACCEPTED' }) // Revert back to active/accepted status if broker rejects points claim
+        .eq('id', referralId);
+
+      if (error) {
+        alert("Error rejecting approval: " + error.message);
+      } else {
+        alert("Points approval rejected. Lead reverted to Active status.");
+        loadBrokerData();
+      }
     }
 
     // LOAD PENDING REVIEW LEADS FOR BROKER (REJECTED OR ACTIVE SET TO CLOSED/LOST)
@@ -1285,7 +1295,7 @@
           <div class="bg-red-50/60 border border-red-200 rounded-xl p-3 shadow-sm space-y-2">
             <div class="flex justify-between items-center mb-1">
               <h5 class="text-sm font-bold text-slate-800">🏠 ${ref.ref_first_name} ${ref.ref_last_name}</h5>
-              <span class="text-[9px] font-bold px-2 py-0.5 rounded ${getStatusBadgeClass(ref.status)} uppercase">${formatStatusLabel(ref.status)}</span>
+              <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-amber-600 text-white uppercase">${formatStatusLabel(ref.status)}</span>
             </div>
             <p class="text-xs text-slate-500 mb-1">Email: ${ref.ref_email} | Phone: ${ref.ref_phone}</p>
             <div class="text-xs text-slate-600 space-y-1">
