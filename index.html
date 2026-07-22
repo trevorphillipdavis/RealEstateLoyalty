@@ -104,27 +104,34 @@
           <p class="text-xs text-slate-500">Assigned Referral Pipeline</p>
         </div>
 
-        <!-- AGENT PORTAL SUB-TABS -->
-        <div class="flex border-b border-slate-200 text-xs font-bold text-center">
+        <!-- AGENT PORTAL SUB-TABS WITH TOTALS -->
+        <div class="flex border-b border-slate-200 text-[11px] font-bold text-center">
           <button id="agent-subtab-btn-leads" onclick="switchAgentSubTab('leads')" class="flex-1 py-2 border-b-2 border-blue-600 text-blue-600">
-            Leads
+            Leads (<span id="count-leads">0</span>)
           </button>
           <button id="agent-subtab-btn-active" onclick="switchAgentSubTab('active')" class="flex-1 py-2 text-slate-400 hover:text-slate-600">
-            Active
+            Active (<span id="count-active">0</span>)
           </button>
           <button id="agent-subtab-btn-won" onclick="switchAgentSubTab('won')" class="flex-1 py-2 text-slate-400 hover:text-slate-600">
-            Closed/Won
+            Closed/Won (<span id="count-won">0</span>)
           </button>
           <button id="agent-subtab-btn-lost" onclick="switchAgentSubTab('lost')" class="flex-1 py-2 text-slate-400 hover:text-slate-600">
-            Closed/Lost
+            Closed/Lost (<span id="count-lost">0</span>)
           </button>
         </div>
 
-        <!-- AGENT SUB-TAB CONTENT CONTAINERS -->
-        <div id="agent-subtab-leads" class="agent-subtab-content space-y-3"></div>
-        <div id="agent-subtab-active" class="agent-subtab-content hidden space-y-3"></div>
-        <div id="agent-subtab-won" class="agent-subtab-content hidden space-y-3"></div>
-        <div id="agent-subtab-lost" class="agent-subtab-content hidden space-y-3"></div>
+        <!-- AGENT SUB-TAB FIXED HEIGHT CONTAINERS -->
+        <div class="min-h-[380px] max-h-[380px] overflow-y-auto pr-1">
+          <div id="agent-subtab-leads" class="agent-subtab-content space-y-3"></div>
+          <div id="agent-subtab-active" class="agent-subtab-content hidden space-y-3"></div>
+          <div id="agent-subtab-won" class="agent-subtab-content hidden space-y-3"></div>
+          <div id="agent-subtab-lost" class="agent-subtab-content hidden space-y-3"></div>
+        </div>
+
+        <!-- SUBMIT A LEAD BUTTON FOR AGENTS -->
+        <button onclick="openAgentLeadModal()" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-2.5 rounded-xl text-sm shadow-md transition-all flex items-center justify-center gap-1.5">
+          <span>➕</span> Submit a Lead
+        </button>
       </section>
 
       <!-- TAB 4: BROKERAGE MANAGEMENT -->
@@ -159,6 +166,55 @@
 
     </div>
   </main>
+
+  <!-- AGENT SUBMIT LEAD MODAL POPUP -->
+  <div id="agent-lead-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 space-y-4 border border-slate-200 relative animate-in fade-in zoom-in duration-150">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+        <h3 class="font-bold text-blue-900 text-base flex items-center gap-2">
+          <span>🏠</span> Direct Lead Submission
+        </h3>
+        <button onclick="closeAgentLeadModal()" class="text-slate-400 hover:text-slate-600 font-bold text-lg">&times;</button>
+      </div>
+
+      <form id="agent-lead-form" onsubmit="handleAgentSubmitLead(event)" class="space-y-3">
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-600 mb-1">First Name</label>
+            <input type="text" id="agent-lead-fn" required class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Last Name</label>
+            <input type="text" id="agent-lead-ln" required class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-600 mb-1">Phone Number</label>
+          <input type="tel" id="agent-lead-phone" required class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500" placeholder="(555) 000-0000">
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-600 mb-1">Email Address</label>
+          <input type="email" id="agent-lead-email" required class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500" placeholder="lead@example.com">
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-600 mb-1">Notes / Property Preference</label>
+          <textarea id="agent-lead-notes" rows="3" class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500" placeholder="Looking for 3 bed, 2 bath in suburbs..."></textarea>
+        </div>
+
+        <div class="pt-2 flex gap-2">
+          <button type="button" onclick="closeAgentLeadModal()" class="w-1/2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-lg text-xs">
+            Cancel
+          </button>
+          <button type="submit" class="w-1/2 bg-blue-900 hover:bg-blue-800 text-white font-semibold py-2.5 rounded-lg text-xs">
+            Submit Lead
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <!-- BOTTOM NAVIGATION BAR -->
   <nav id="bottom-nav" class="hidden w-full bg-white border-t border-slate-200 fixed bottom-0 left-0 right-0 py-2 px-4 shadow-lg">
@@ -329,7 +385,46 @@
       });
     }
 
-    // SUBMIT REFERRAL
+    // MODAL CONTROL FOR AGENT SUBMIT LEAD
+    function openAgentLeadModal() {
+      document.getElementById('agent-lead-modal').classList.remove('hidden');
+    }
+
+    function closeAgentLeadModal() {
+      document.getElementById('agent-lead-modal').classList.add('hidden');
+      document.getElementById('agent-lead-form').reset();
+    }
+
+    // HANDLE SUBMIT LEAD BY AGENT
+    async function handleAgentSubmitLead(e) {
+      e.preventDefault();
+      const firstName = document.getElementById('agent-lead-fn').value;
+      const lastName = document.getElementById('agent-lead-ln').value;
+      const phone = document.getElementById('agent-lead-phone').value;
+      const email = document.getElementById('agent-lead-email').value;
+      const notes = document.getElementById('agent-lead-notes').value;
+
+      const { error } = await supabaseClient.from('referrals').insert([{
+        referrer_client_id: currentUser.id,
+        ref_first_name: firstName,
+        ref_last_name: lastName,
+        ref_email: email,
+        ref_phone: phone,
+        notes: notes,
+        status: 'ACCEPTED' // Directly set to active for agents submitting their own leads
+      }]);
+
+      if (error) {
+        alert("Error submitting lead: " + error.message);
+      } else {
+        alert("Lead created successfully!");
+        closeAgentLeadModal();
+        await loadAgentPortalData();
+        switchAgentSubTab('active');
+      }
+    }
+
+    // SUBMIT REFERRAL BY CLIENT
     async function handleSubmitReferral(e) {
       e.preventDefault();
       const firstName = document.getElementById('ref-first-name').value;
@@ -375,7 +470,7 @@
       return 'Agent';
     }
 
-    // LOAD AGENT PORTAL PIPELINE (CASE-INSENSITIVE CATEGORIZATION)
+    // LOAD AGENT PORTAL PIPELINE
     async function loadAgentPortalData() {
       const { data: referrals, error } = await supabaseClient.from('referrals').select('*');
 
@@ -387,7 +482,6 @@
       const clientIds = [...new Set((referrals || []).map(r => r.referrer_client_id).filter(Boolean))];
       const clientsMap = await fetchClientsMap(clientIds);
 
-      // Case-insensitive status mapping
       const leads = (referrals || []).filter(r => {
         const s = (r.status || 'PENDING').toUpperCase();
         return s === 'PENDING' || s === 'NEW';
@@ -408,7 +502,11 @@
         return s === 'REJECTED' || s === 'CLOSED_LOST' || s === 'LOST';
       });
 
-      // Render Containers
+      document.getElementById('count-leads').innerText = leads.length;
+      document.getElementById('count-active').innerText = active.length;
+      document.getElementById('count-won').innerText = won.length;
+      document.getElementById('count-lost').innerText = lost.length;
+
       renderAgentSubTabContent('agent-subtab-leads', leads, clientsMap, 'leads');
       renderAgentSubTabContent('agent-subtab-active', active, clientsMap, 'active');
       renderAgentSubTabContent('agent-subtab-won', won, clientsMap, 'won');
@@ -418,7 +516,7 @@
     function renderAgentSubTabContent(containerId, list, clientsMap, subTabType) {
       const container = document.getElementById(containerId);
       if (!list || list.length === 0) {
-        container.innerHTML = `<p class="text-slate-400 text-center py-4 text-xs">No referrals in this stage.</p>`;
+        container.innerHTML = `<p class="text-slate-400 text-center py-8 text-xs">No referrals in this stage.</p>`;
         return;
       }
 
@@ -459,7 +557,9 @@
                 ${formatStatusLabel(rawStatus)}
               </span>
             </div>
-            <p class="text-xs text-slate-500 mb-3">Email: ${ref.ref_email} | Phone: ${ref.ref_phone}</p>
+            <p class="text-xs text-slate-500 mb-2">Email: ${ref.ref_email} | Phone: ${ref.ref_phone}</p>
+            ${ref.notes ? `<p class="text-xs text-slate-600 italic bg-slate-50 p-2 rounded mb-3 border border-slate-100">📝 Notes: ${ref.notes}</p>` : ''}
+            
             <div class="p-2.5 bg-blue-50/80 rounded-lg border-l-4 border-blue-600 text-xs text-slate-700">
               <span class="font-bold">Submitted By:</span> ${referrerName} (${referrerEmail})
             </div>
@@ -484,30 +584,45 @@
       return status || 'PENDING';
     }
 
-    // UPDATE STATUS GENERIC
+    // UPDATE STATUS WITH ERROR HANDLING
     async function updateLeadStatus(id, newStatus) {
-      const { error } = await supabaseClient.from('referrals').update({ status: newStatus }).eq('id', id);
-      if (error) alert("Error: " + error.message);
-      else loadAgentPortalData();
+      const { error } = await supabaseClient
+        .from('referrals')
+        .update({ status: newStatus })
+        .eq('id', id);
+
+      if (error) {
+        alert("Database Error: " + error.message);
+      } else {
+        await loadAgentPortalData();
+        if (newStatus === 'ACCEPTED') {
+          switchAgentSubTab('active');
+        } else if (newStatus === 'REJECTED') {
+          switchAgentSubTab('lost');
+        }
+      }
     }
 
     // HANDLE CLOSED/WON ACTION BY AGENT
     async function handleCloseWon(referralId, referrerClientId) {
       let referrerRole = 'agent';
-      if (referrerClientId) {
+      if (referrerClientId && referrerClientId !== 'undefined') {
         const { data } = await supabaseClient.from('clients').select('role').eq('id', referrerClientId).maybeSingle();
         if (data) referrerRole = data.role;
       }
 
       if (referrerRole === 'client') {
         const { error } = await supabaseClient.from('referrals').update({ status: 'PENDING_BROKER_APPROVAL' }).eq('id', referralId);
-        if (error) alert("Error: " + error.message);
-        else {
+        if (error) {
+          alert("Error: " + error.message);
+        } else {
           alert("Lead marked as Closed/Won! Sent to Broker to approve points award.");
-          loadAgentPortalData();
+          await loadAgentPortalData();
+          switchAgentSubTab('won');
         }
       } else {
-        updateLeadStatus(referralId, 'CLOSED_WON');
+        await updateLeadStatus(referralId, 'CLOSED_WON');
+        switchAgentSubTab('won');
       }
     }
 
@@ -575,9 +690,7 @@
       const container = document.getElementById('broker-rejected-leads-container');
       if (!container) return;
 
-      const { data: referrals, error } = await supabaseClient
-        .from('referrals')
-        .select('*');
+      const { data: referrals, error } = await supabaseClient.from('referrals').select('*');
 
       if (error || !referrals || referrals.length === 0) {
         container.innerHTML = `<p class="text-slate-400 text-center py-2 text-xs">No rejected or lost leads found.</p>`;
