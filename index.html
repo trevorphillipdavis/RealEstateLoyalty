@@ -7,12 +7,12 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="bg-slate-100 min-h-screen flex flex-col items-center justify-between font-sans pb-24">
+<body class="bg-slate-100 min-h-screen flex flex-col items-center justify-between font-sans pb-28 relative">
 
   <!-- MAIN CONTAINER -->
   <main class="w-full max-w-md p-4 flex-1 flex flex-col justify-center">
 
-    <!-- AUTH CARD (Shown when logged out) -->
+    <!-- AUTH CARD (Shown when logged out - DEFAULT IS LOG IN) -->
     <div id="auth-card" class="bg-white rounded-2xl shadow-xl p-6 border border-slate-200">
       <div class="text-center mb-6">
         <h1 class="text-2xl font-bold text-blue-900" id="auth-title">Brokerage Rewards</h1>
@@ -20,13 +20,27 @@
       </div>
 
       <form id="auth-form" class="space-y-4" onsubmit="handleAuth(event)">
-        <div id="name-field-group" class="hidden">
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Full Name</label>
-          <input type="text" id="full-name-input" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Jane Doe">
+        <!-- Extra Fields for Sign Up Mode -->
+        <div id="signup-extra-fields" class="hidden space-y-3">
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">First Name</label>
+              <input type="text" id="first-name-input" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Jane">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Last Name</label>
+              <input type="text" id="last-name-input" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Doe">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Phone Number</label>
+            <input type="tel" id="phone-input" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="(555) 000-0000">
+          </div>
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Email Address</label>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Email Address (Username)</label>
           <input type="email" id="email-input" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="name@example.com">
         </div>
 
@@ -42,6 +56,7 @@
         </button>
       </form>
 
+      <!-- Toggle option below to switch to Sign Up -->
       <div class="text-center mt-4">
         <button onclick="toggleAuthMode()" id="auth-toggle-btn" class="text-xs text-blue-600 hover:underline font-medium">
           Need an account? Sign Up
@@ -97,7 +112,7 @@
         <p class="text-sm text-slate-500">Browse available homes in your area.</p>
       </section>
 
-      <!-- TAB 3: AGENT PORTAL -->
+      <!-- TAB 3: AGENT PORTAL (FOR AGENTS & BROKERS) -->
       <section id="tab-agent" class="tab-content hidden bg-white rounded-2xl shadow-sm p-6 border border-slate-200 space-y-4">
         <div class="text-center">
           <h3 class="text-xl font-bold text-blue-900">Agent Portal</h3>
@@ -162,7 +177,7 @@
     </div>
   </main>
 
-  <!-- AGENT SUBMIT LEAD MODAL POPUP -->
+  <!-- SUBMIT LEAD MODAL POPUP -->
   <div id="agent-lead-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 space-y-4 border border-slate-200 relative animate-in fade-in zoom-in duration-150">
       <div class="flex justify-between items-center border-b border-slate-100 pb-3">
@@ -211,8 +226,8 @@
     </div>
   </div>
 
-  <!-- BOTTOM NAVIGATION BAR WITH "SUBMIT A LEAD" INTEGRATED -->
-  <nav id="bottom-nav" class="hidden w-full bg-white border-t border-slate-200 fixed bottom-0 left-0 right-0 py-2 px-4 shadow-lg z-40">
+  <!-- BOTTOM NAVIGATION BAR -->
+  <nav id="bottom-nav" class="hidden w-full bg-white border-t border-slate-200 fixed bottom-6 left-0 right-0 py-2 px-4 shadow-lg z-40">
     <div class="max-w-md mx-auto flex justify-around items-center" id="nav-tabs-container">
       <button id="nav-rewards-btn" onclick="switchTab('tab-rewards')" class="nav-btn text-blue-600 flex flex-col items-center">
         <span class="text-lg">💎</span>
@@ -237,6 +252,11 @@
       </button>
     </div>
   </nav>
+
+  <!-- ALWAYS VISIBLE VERSION FOOTER -->
+  <footer class="fixed bottom-0 left-0 right-0 bg-slate-200/80 backdrop-blur-xs py-1 text-center border-t border-slate-300 z-50">
+    <p class="text-[10px] font-bold text-slate-500 tracking-wider">v1.0.0</p>
+  </footer>
 
   <!-- APP JAVASCRIPT -->
   <script>
@@ -300,15 +320,15 @@
       if (currentUserRole === 'agent') {
         rewardsNav.classList.add('hidden');
         agentNav.classList.remove('hidden');
-        submitLeadNav.classList.remove('hidden'); // Show Submit a Lead in nav for agents
+        submitLeadNav.classList.remove('hidden');
         brokerNav.classList.add('hidden');
         switchTab('tab-agent');
       } else if (currentUserRole === 'broker') {
-        rewardsNav.classList.remove('hidden');
+        rewardsNav.classList.add('hidden');
         agentNav.classList.remove('hidden');
-        submitLeadNav.classList.remove('hidden'); // Show Submit a Lead in nav for brokers
+        submitLeadNav.classList.remove('hidden');
         brokerNav.classList.remove('hidden');
-        switchTab('tab-rewards');
+        switchTab('tab-agent');
       } else {
         rewardsNav.classList.remove('hidden');
         agentNav.classList.add('hidden');
@@ -324,15 +344,23 @@
       document.getElementById('bottom-nav').classList.add('hidden');
     }
 
+    // TOGGLE BETWEEN LOG IN AND SIGN UP
     function toggleAuthMode() {
       isSignUp = !isSignUp;
-      document.getElementById('auth-title').innerText = isSignUp ? 'Create Account' : 'Brokerage Rewards';
+      document.getElementById('auth-title').innerText = isSignUp ? 'Create Client Account' : 'Brokerage Rewards';
       document.getElementById('auth-subtitle').innerText = isSignUp ? 'Sign up to start earning rewards' : 'Log in to view your account';
-      document.getElementById('name-field-group').classList.toggle('hidden', !isSignUp);
-      document.getElementById('auth-submit-btn').innerText = isSignUp ? 'Sign Up' : 'Log In';
+      
+      document.getElementById('signup-extra-fields').classList.toggle('hidden', !isSignUp);
+      
+      document.getElementById('first-name-input').required = isSignUp;
+      document.getElementById('last-name-input').required = isSignUp;
+      document.getElementById('phone-input').required = isSignUp;
+
+      document.getElementById('auth-submit-btn').innerText = isSignUp ? 'Create Account' : 'Log In';
       document.getElementById('auth-toggle-btn').innerText = isSignUp ? 'Already have an account? Log In' : 'Need an account? Sign Up';
     }
 
+    // AUTHENTICATION HANDLER
     async function handleAuth(e) {
       e.preventDefault();
       const email = document.getElementById('email-input').value;
@@ -341,18 +369,42 @@
       errorEl.classList.add('hidden');
 
       if (isSignUp) {
-        const fullName = document.getElementById('full-name-input').value;
-        const { data, error } = await supabaseClient.auth.signUp({ email, password });
+        const firstName = document.getElementById('first-name-input').value;
+        const lastName = document.getElementById('last-name-input').value;
+        const phone = document.getElementById('phone-input').value;
+        const fullName = `${firstName} ${lastName}`.trim();
+
+        const { data, error } = await supabaseClient.auth.signUp({ 
+          email: email, 
+          password: password 
+        });
+
         if (error) {
           errorEl.innerText = error.message;
           errorEl.classList.remove('hidden');
           return;
         }
+
         if (data.user) {
-          await supabaseClient.from('clients').insert([{ id: data.user.id, email: email, full_name: fullName, role: 'client' }]);
+          const { error: dbError } = await supabaseClient.from('clients').insert([{ 
+            id: data.user.id, 
+            email: email, 
+            full_name: fullName, 
+            phone: phone,
+            role: 'client',
+            points: 0
+          }]);
+
+          if (dbError) {
+            console.error("Error creating client profile record:", dbError.message);
+          }
         }
       } else {
-        const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        const { error } = await supabaseClient.auth.signInWithPassword({ 
+          email: email, 
+          password: password 
+        });
+
         if (error) {
           errorEl.innerText = error.message;
           errorEl.classList.remove('hidden');
@@ -389,7 +441,7 @@
       });
     }
 
-    // MODAL CONTROL FOR AGENT SUBMIT LEAD
+    // MODAL CONTROL FOR SUBMIT LEAD
     function openAgentLeadModal() {
       document.getElementById('agent-lead-modal').classList.remove('hidden');
     }
@@ -399,7 +451,7 @@
       document.getElementById('agent-lead-form').reset();
     }
 
-    // HANDLE SUBMIT LEAD BY AGENT
+    // HANDLE SUBMIT LEAD
     async function handleAgentSubmitLead(e) {
       e.preventDefault();
       const firstName = document.getElementById('agent-lead-fn').value;
