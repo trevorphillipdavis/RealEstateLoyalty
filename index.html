@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Brokerage Rewards - Century 21 Edition</title>
+  <title>Brokerage Rewards - Century21 Global Connections Realty</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -37,16 +37,15 @@
     <div id="auth-card" class="bg-white rounded-2xl shadow-xl p-6 border border-slate-200 h-[520px] flex flex-col justify-between overflow-y-auto">
       <div>
         <div class="text-center mb-6">
-          <div class="flex justify-center mb-3">
-            <!-- CENTURY 21 GRAPHIC WITH BLANK/TRANSPARENT BACKGROUND -->
+          <div class="flex flex-col items-center justify-center mb-3">
             <img 
               src="https://www.pngitem.com/pimgs/m/250-2501912_century-21-logo-png-logo-century-21-2018.png" 
-              alt="Century 21 Logo" 
+              alt="Century21 Logo" 
               class="h-12 object-contain mix-blend-multiply bg-transparent"
               onerror="this.style.display='none'; document.getElementById('auth-c21-fallback').style.display='inline-block';"
             />
             <div id="auth-c21-fallback" class="hidden bg-c21dark px-3 py-1 rounded-md">
-              <span class="text-c21gold font-extrabold text-xs tracking-widest uppercase">CENTURY 21</span>
+              <span class="text-c21gold font-extrabold text-[10px] tracking-widest uppercase">CENTURY21 Global Connections Realty</span>
             </div>
           </div>
 
@@ -108,19 +107,19 @@
     <!-- APP CONTENT VIEWS (Shown when logged in) -->
     <div id="app-content" class="hidden w-full space-y-4">
 
-      <!-- HEADER CARD -->
+      <!-- FIXED HEADER CARD -->
       <div class="bg-c21dark rounded-2xl shadow-md p-4 border border-c21gold/20 flex justify-between items-center text-white">
         <div class="flex items-center gap-3">
           <div class="bg-white p-1 rounded-lg flex items-center justify-center">
             <img 
               src="https://www.pngitem.com/pimgs/m/250-2501912_century-21-logo-png-logo-century-21-2018.png" 
-              alt="Century 21 Logo" 
+              alt="Century21 Logo" 
               class="h-7 object-contain mix-blend-multiply"
               onerror="this.style.display='none'; document.getElementById('header-c21-fallback').style.display='block';"
             />
           </div>
           <div>
-            <span id="header-c21-fallback" class="hidden text-[10px] font-extrabold text-c21gold tracking-widest uppercase block mb-0.5">CENTURY 21</span>
+            <span class="text-[9px] font-extrabold text-c21gold tracking-wider uppercase block leading-tight">Century21 Global Connections Realty</span>
             <h2 class="text-base font-bold text-white leading-tight" id="welcome-header">Welcome Back!</h2>
           </div>
         </div>
@@ -129,7 +128,7 @@
         </button>
       </div>
 
-      <!-- TAB 1: REWARDS (UNIFORM FIXED HEIGHT h-[520px]) -->
+      <!-- TAB 1: REWARDS -->
       <section id="tab-rewards" class="tab-content hidden bg-white rounded-2xl shadow-sm p-6 border border-slate-200 h-[520px] overflow-y-auto space-y-4">
         <div class="border-2 border-dashed border-c21gold-border rounded-xl p-4 text-center bg-c21gold-light">
           <p class="text-xs font-semibold text-slate-600 uppercase tracking-wider">Current Balance</p>
@@ -158,7 +157,7 @@
         </form>
       </section>
 
-      <!-- TAB 2: MY REFERRALS (UNIFORM FIXED HEIGHT h-[520px]) -->
+      <!-- TAB 2: MY REFERRALS -->
       <section id="tab-my-referrals" class="tab-content hidden bg-white rounded-2xl shadow-sm p-6 border border-slate-200 h-[520px] overflow-y-auto space-y-4">
         <div class="text-center mb-2">
           <h3 class="text-xl font-bold text-c21dark">Submitted Referrals</h3>
@@ -170,11 +169,11 @@
         </div>
       </section>
 
-      <!-- TAB 3: MY REALTOR (UNIFORM FIXED HEIGHT h-[520px]) -->
+      <!-- TAB 3: MY REALTOR -->
       <section id="tab-realtor" class="tab-content hidden bg-white rounded-2xl shadow-sm p-6 border border-slate-200 h-[520px] overflow-y-auto space-y-4">
         <div class="text-center mb-2">
           <h3 class="text-xl font-bold text-c21dark">My Assigned Realtor</h3>
-          <p class="text-xs text-slate-500">Your dedicated Century 21 professional</p>
+          <p class="text-xs text-slate-500">Your dedicated Century21 Global Connections Realty professional</p>
         </div>
 
         <div id="realtor-profile-container" class="p-4 border border-slate-200 rounded-2xl bg-slate-50/50 shadow-sm text-center space-y-3">
@@ -182,13 +181,13 @@
         </div>
       </section>
 
-      <!-- TAB 4: BROWSE HOMES (UNIFORM FIXED HEIGHT h-[520px]) -->
+      <!-- TAB 4: BROWSE HOMES -->
       <section id="tab-homes" class="tab-content hidden bg-white rounded-2xl shadow-sm p-6 border border-slate-200 h-[520px] overflow-y-auto">
         <h3 class="text-lg font-bold text-slate-900 mb-2">Featured Properties</h3>
         <p class="text-sm text-slate-500">Browse available homes in your area.</p>
       </section>
 
-      <!-- TAB 5: AGENT PORTAL (UNIFORM FIXED HEIGHT h-[520px]) -->
+      <!-- TAB 5: AGENT PORTAL -->
       <section id="tab-agent" class="tab-content hidden bg-white rounded-2xl shadow-sm p-6 border border-slate-200 h-[520px] overflow-y-auto space-y-4">
         <div class="text-center">
           <h3 class="text-xl font-bold text-c21dark">Agent Portal</h3>
@@ -218,7 +217,7 @@
         </div>
       </section>
 
-      <!-- TAB 6: BROKERAGE MANAGEMENT (UNIFORM FIXED HEIGHT h-[520px]) -->
+      <!-- TAB 6: BROKERAGE MANAGEMENT -->
       <section id="tab-broker" class="tab-content hidden bg-white rounded-2xl shadow-sm p-6 border border-slate-200 h-[520px] overflow-y-auto space-y-6">
         <div class="text-center">
           <h3 class="text-xl font-bold text-c21dark">Brokerage Management</h3>
@@ -229,9 +228,7 @@
           <h4 class="font-bold text-slate-800 text-sm flex items-center gap-1.5">
             <span>💎</span> Pending Points Approvals
           </h4>
-          <div id="broker-pending-approvals-container" class="space-y-3">
-            <!-- Rendered dynamically -->
-          </div>
+          <div id="broker-pending-approvals-container" class="space-y-3"></div>
         </div>
 
         <hr class="border-slate-100" />
@@ -240,13 +237,11 @@
           <h4 class="font-bold text-slate-800 text-sm flex items-center gap-1.5">
             <span>🚫</span> Rejected & Closed Leads
           </h4>
-          <div id="broker-rejected-leads-container" class="space-y-3">
-            <!-- Rendered dynamically -->
-          </div>
+          <div id="broker-rejected-leads-container" class="space-y-3"></div>
         </div>
       </section>
 
-      <!-- TAB 7: LOCAL MARKET NEWS (UNIFORM FIXED HEIGHT h-[520px]) -->
+      <!-- TAB 7: LOCAL MARKET NEWS -->
       <section id="tab-news" class="tab-content hidden bg-white rounded-2xl shadow-sm p-6 border border-slate-200 h-[520px] overflow-y-auto space-y-4">
         <div class="text-center mb-2">
           <h3 class="text-xl font-bold text-c21dark">Local Market News</h3>
@@ -387,7 +382,7 @@
 
   <!-- ALWAYS VISIBLE VERSION FOOTER -->
   <footer class="fixed bottom-0 left-0 right-0 bg-c21dark py-1 text-center border-t border-c21gold/20 z-50">
-    <p class="text-[10px] font-bold text-c21gold tracking-wider">CENTURY 21® Rewards v1.0.0</p>
+    <p class="text-[10px] font-bold text-c21gold tracking-wider">CENTURY21 Global Connections Realty® v1.0.0</p>
   </footer>
 
   <!-- APP JAVASCRIPT -->
@@ -421,16 +416,10 @@
     async function fetchUserRole(user) {
       currentUserFirstName = '';
 
-      if (user.user_metadata?.first_name) {
-        currentUserFirstName = user.user_metadata.first_name;
-      } else if (user.user_metadata?.full_name) {
-        currentUserFirstName = user.user_metadata.full_name.trim().split(' ')[0];
-      }
-
       try {
         const { data, error } = await supabaseClient
           .from('clients')
-          .select('role, points, assigned_agent_id, full_name')
+          .select('*')
           .eq('id', user.id)
           .maybeSingle();
 
@@ -454,6 +443,13 @@
         currentUserRole = 'client';
       }
 
+      // Fallback check from user metadata if database name was missing
+      if (!currentUserFirstName && user.user_metadata) {
+        if (user.user_metadata.first_name) currentUserFirstName = user.user_metadata.first_name;
+        else if (user.user_metadata.full_name) currentUserFirstName = user.user_metadata.full_name.trim().split(' ')[0];
+      }
+
+      // Update Header Display Text
       const headerEl = document.getElementById('welcome-header');
       if (headerEl) {
         headerEl.innerText = currentUserFirstName 
@@ -509,18 +505,18 @@
       populateAgentDropdown();
     }
 
-    // POPULATE AGENT DROPDOWN FOR SIGN UP
+    // POPULATE AGENT DROPDOWN
     async function populateAgentDropdown() {
       const selectEl = document.getElementById('agent-select-input');
       if (!selectEl) return;
 
-      const { data: agents } = await supabaseClient
+      const { data: agents, error } = await supabaseClient
         .from('clients')
         .select('id, full_name, email, role')
         .in('role', ['agent', 'broker']);
 
       selectEl.innerHTML = `<option value="">-- Assign directly to Broker --</option>`;
-      if (agents && agents.length > 0) {
+      if (!error && agents && agents.length > 0) {
         agents.forEach(ag => {
           const name = (ag.full_name && ag.full_name.trim()) ? ag.full_name : ag.email;
           const roleBadge = ag.role === 'broker' ? ' (Broker)' : ' (Agent)';
