@@ -37,6 +37,14 @@
             <label class="block text-xs font-semibold text-slate-600 mb-1">Phone Number</label>
             <input type="tel" id="phone-input" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="(555) 000-0000">
           </div>
+
+          <!-- AGENT SELECTION DROPDOWN -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Select Your Realtor (Optional)</label>
+            <select id="agent-select-input" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-xs">
+              <option value="">-- Assign directly to Broker --</option>
+            </select>
+          </div>
         </div>
 
         <div>
@@ -119,13 +127,25 @@
         </div>
       </section>
 
-      <!-- TAB 3: BROWSE HOMES -->
+      <!-- TAB 3: MY REALTOR (CLIENT ONLY) -->
+      <section id="tab-realtor" class="tab-content hidden bg-white rounded-2xl shadow-sm p-6 border border-slate-200 space-y-4">
+        <div class="text-center mb-2">
+          <h3 class="text-xl font-bold text-blue-900">My Assigned Realtor</h3>
+          <p class="text-xs text-slate-500">Your dedicated real estate professional</p>
+        </div>
+
+        <div id="realtor-profile-container" class="p-4 border border-slate-200 rounded-2xl bg-slate-50/50 shadow-sm text-center space-y-3">
+          <p class="text-slate-400 text-xs py-8">Loading realtor information...</p>
+        </div>
+      </section>
+
+      <!-- TAB 4: BROWSE HOMES -->
       <section id="tab-homes" class="tab-content hidden bg-white rounded-2xl shadow-sm p-6 border border-slate-200">
         <h3 class="text-lg font-bold text-slate-900 mb-2">Featured Properties</h3>
         <p class="text-sm text-slate-500">Browse available homes in your area.</p>
       </section>
 
-      <!-- TAB 4: AGENT PORTAL (FOR AGENTS & BROKERS) -->
+      <!-- TAB 5: AGENT PORTAL (FOR AGENTS & BROKERS) -->
       <section id="tab-agent" class="tab-content hidden bg-white rounded-2xl shadow-sm p-6 border border-slate-200 space-y-4">
         <div class="text-center">
           <h3 class="text-xl font-bold text-blue-900">Agent Portal</h3>
@@ -157,7 +177,7 @@
         </div>
       </section>
 
-      <!-- TAB 5: BROKERAGE MANAGEMENT -->
+      <!-- TAB 6: BROKERAGE MANAGEMENT -->
       <section id="tab-broker" class="tab-content hidden bg-white rounded-2xl shadow-sm p-6 border border-slate-200 space-y-6">
         <div class="text-center">
           <h3 class="text-xl font-bold text-blue-900">Brokerage Management</h3>
@@ -187,7 +207,7 @@
         </div>
       </section>
 
-      <!-- TAB 6: LOCAL MARKET NEWS -->
+      <!-- TAB 7: LOCAL MARKET NEWS -->
       <section id="tab-news" class="tab-content hidden bg-white rounded-2xl shadow-sm p-6 border border-slate-200 space-y-4">
         <div class="text-center mb-2">
           <h3 class="text-xl font-bold text-blue-900">Local Market News</h3>
@@ -195,7 +215,6 @@
         </div>
 
         <div class="min-h-[380px] max-h-[380px] overflow-y-auto pr-1 space-y-4">
-          <!-- Article 1 -->
           <article class="border border-slate-200 rounded-xl overflow-hidden bg-slate-50/50 shadow-sm">
             <div class="bg-blue-900 h-24 flex items-center justify-center text-white text-3xl">📈</div>
             <div class="p-3">
@@ -209,7 +228,6 @@
             </div>
           </article>
 
-          <!-- Article 2 -->
           <article class="border border-slate-200 rounded-xl overflow-hidden bg-slate-50/50 shadow-sm">
             <div class="bg-emerald-800 h-24 flex items-center justify-center text-white text-3xl">🏡</div>
             <div class="p-3">
@@ -223,7 +241,6 @@
             </div>
           </article>
 
-          <!-- Article 3 -->
           <article class="border border-slate-200 rounded-xl overflow-hidden bg-slate-50/50 shadow-sm">
             <div class="bg-amber-700 h-24 flex items-center justify-center text-white text-3xl">🏦</div>
             <div class="p-3">
@@ -291,8 +308,8 @@
     </div>
   </div>
 
-  <!-- BOTTOM NAVIGATION BAR WITH MY REFERRALS & LOCAL MARKET NEWS -->
-  <nav id="bottom-nav" class="hidden w-full bg-white border-t border-slate-200 fixed bottom-6 left-0 right-0 py-2 px-2 shadow-lg z-40">
+  <!-- BOTTOM NAVIGATION BAR WITH MY REALTOR INCLUDED -->
+  <nav id="bottom-nav" class="hidden w-full bg-white border-t border-slate-200 fixed bottom-6 left-0 right-0 py-2 px-1 shadow-lg z-40">
     <div class="max-w-md mx-auto flex justify-around items-center" id="nav-tabs-container">
       <button id="nav-rewards-btn" onclick="switchTab('tab-rewards')" class="nav-btn text-blue-600 flex flex-col items-center">
         <span class="text-base">💎</span>
@@ -300,7 +317,11 @@
       </button>
       <button id="nav-my-referrals-btn" onclick="switchTab('tab-my-referrals')" class="nav-btn text-slate-400 flex flex-col items-center">
         <span class="text-base">📋</span>
-        <span class="text-[9px] font-semibold">My Referrals</span>
+        <span class="text-[9px] font-semibold">Referrals</span>
+      </button>
+      <button id="nav-realtor-btn" onclick="switchTab('tab-realtor')" class="nav-btn text-slate-400 flex flex-col items-center">
+        <span class="text-base">👤</span>
+        <span class="text-[9px] font-semibold">My Realtor</span>
       </button>
       <button id="nav-homes-btn" onclick="switchTab('tab-homes')" class="nav-btn text-slate-400 flex flex-col items-center">
         <span class="text-base">🏠</span>
@@ -308,7 +329,7 @@
       </button>
       <button id="nav-news-btn" onclick="switchTab('tab-news')" class="nav-btn text-slate-400 flex flex-col items-center">
         <span class="text-base">📰</span>
-        <span class="text-[9px] font-semibold">Market News</span>
+        <span class="text-[9px] font-semibold">News</span>
       </button>
       <button id="nav-agent-btn" onclick="switchTab('tab-agent')" class="nav-btn hidden text-slate-400 flex flex-col items-center">
         <span class="text-base">🛡️</span>
@@ -341,6 +362,7 @@
     let isSignUp = false;
     let currentUser = null;
     let currentUserRole = 'client';
+    let currentUserAssignedAgentId = null;
 
     // AUTH STATE LISTENER
     supabaseClient.auth.onAuthStateChange(async (event, session) => {
@@ -355,12 +377,12 @@
       }
     });
 
-    // FETCH USER ROLE FROM CLIENTS TABLE
+    // FETCH USER ROLE AND ASSIGNED AGENT
     async function fetchUserRole(userId) {
       try {
         const { data, error } = await supabaseClient
           .from('clients')
-          .select('role, points')
+          .select('role, points, assigned_agent_id')
           .eq('id', userId)
           .maybeSingle();
 
@@ -369,6 +391,7 @@
           currentUserRole = 'client';
         } else if (data) {
           currentUserRole = data.role || 'client';
+          currentUserAssignedAgentId = data.assigned_agent_id;
           if (document.getElementById('points-balance')) {
             document.getElementById('points-balance').innerText = data.points || 0;
           }
@@ -389,6 +412,7 @@
 
       const rewardsNav = document.getElementById('nav-rewards-btn');
       const myReferralsNav = document.getElementById('nav-my-referrals-btn');
+      const realtorNav = document.getElementById('nav-realtor-btn');
       const agentNav = document.getElementById('nav-agent-btn');
       const submitLeadNav = document.getElementById('nav-submit-lead-btn');
       const brokerNav = document.getElementById('nav-broker-btn');
@@ -396,6 +420,7 @@
       if (currentUserRole === 'agent') {
         rewardsNav.classList.add('hidden');
         myReferralsNav.classList.add('hidden');
+        realtorNav.classList.add('hidden');
         agentNav.classList.remove('hidden');
         submitLeadNav.classList.remove('hidden');
         brokerNav.classList.add('hidden');
@@ -403,6 +428,7 @@
       } else if (currentUserRole === 'broker') {
         rewardsNav.classList.add('hidden');
         myReferralsNav.classList.add('hidden');
+        realtorNav.classList.add('hidden');
         agentNav.classList.remove('hidden');
         submitLeadNav.classList.remove('hidden');
         brokerNav.classList.remove('hidden');
@@ -410,6 +436,7 @@
       } else {
         rewardsNav.classList.remove('hidden');
         myReferralsNav.classList.remove('hidden');
+        realtorNav.classList.remove('hidden');
         agentNav.classList.add('hidden');
         submitLeadNav.classList.add('hidden');
         brokerNav.classList.add('hidden');
@@ -421,6 +448,27 @@
       document.getElementById('auth-card').classList.remove('hidden');
       document.getElementById('app-content').classList.add('hidden');
       document.getElementById('bottom-nav').classList.add('hidden');
+      populateAgentDropdown(); // Load agents into sign-up selector
+    }
+
+    // POPULATE AGENT DROPDOWN FOR SIGN UP
+    async function populateAgentDropdown() {
+      const selectEl = document.getElementById('agent-select-input');
+      if (!selectEl) return;
+
+      const { data: agents } = await supabaseClient
+        .from('clients')
+        .select('id, full_name, email, role')
+        .in('role', ['agent', 'broker']);
+
+      selectEl.innerHTML = `<option value="">-- Assign directly to Broker --</option>`;
+      if (agents && agents.length > 0) {
+        agents.forEach(ag => {
+          const name = (ag.full_name && ag.full_name.trim()) ? ag.full_name : ag.email;
+          const roleBadge = ag.role === 'broker' ? ' (Broker)' : ' (Agent)';
+          selectEl.innerHTML += `<option value="${ag.id}">${name}${roleBadge}</option>`;
+        });
+      }
     }
 
     // TOGGLE BETWEEN LOG IN AND SIGN UP
@@ -451,7 +499,20 @@
         const firstName = document.getElementById('first-name-input').value;
         const lastName = document.getElementById('last-name-input').value;
         const phone = document.getElementById('phone-input').value;
+        let selectedAgentId = document.getElementById('agent-select-input').value;
         const fullName = `${firstName} ${lastName}`.trim();
+
+        // Fallback to Broker if no Agent was selected
+        if (!selectedAgentId) {
+          const { data: brokerData } = await supabaseClient
+            .from('clients')
+            .select('id')
+            .eq('role', 'broker')
+            .limit(1)
+            .maybeSingle();
+            
+          if (brokerData) selectedAgentId = brokerData.id;
+        }
 
         const { data, error } = await supabaseClient.auth.signUp({ 
           email: email, 
@@ -471,6 +532,7 @@
             full_name: fullName, 
             phone: phone,
             role: 'client',
+            assigned_agent_id: selectedAgentId || null,
             points: 0
           }]);
 
@@ -499,7 +561,6 @@
       document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
       document.getElementById(tabId).classList.remove('hidden');
 
-      // Highlight active nav button
       document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.replace('text-blue-600', 'text-slate-400'));
 
       if (tabId === 'tab-agent') {
@@ -511,6 +572,9 @@
       } else if (tabId === 'tab-my-referrals') {
         loadClientReferrals();
         if (document.getElementById('nav-my-referrals-btn')) document.getElementById('nav-my-referrals-btn').classList.replace('text-slate-400', 'text-blue-600');
+      } else if (tabId === 'tab-realtor') {
+        loadAssignedRealtor();
+        if (document.getElementById('nav-realtor-btn')) document.getElementById('nav-realtor-btn').classList.replace('text-slate-400', 'text-blue-600');
       } else if (tabId === 'tab-rewards') {
         if (document.getElementById('nav-rewards-btn')) document.getElementById('nav-rewards-btn').classList.replace('text-slate-400', 'text-blue-600');
       } else if (tabId === 'tab-news') {
@@ -578,7 +642,7 @@
       }
     }
 
-    // SUBMIT REFERRAL BY CLIENT (WITH NOTES FIELD)
+    // SUBMIT REFERRAL BY CLIENT
     async function handleSubmitReferral(e) {
       e.preventDefault();
       const firstName = document.getElementById('ref-first-name').value;
@@ -605,6 +669,73 @@
       }
     }
 
+    // LOAD ASSIGNED REALTOR PROFILE FOR CLIENT
+    async function loadAssignedRealtor() {
+      const container = document.getElementById('realtor-profile-container');
+
+      if (!currentUserAssignedAgentId) {
+        // Fetch fresh if null
+        const { data: me } = await supabaseClient.from('clients').select('assigned_agent_id').eq('id', currentUser.id).maybeSingle();
+        if (me?.assigned_agent_id) currentUserAssignedAgentId = me.assigned_agent_id;
+      }
+
+      if (!currentUserAssignedAgentId) {
+        // Default to Broker if still missing
+        const { data: broker } = await supabaseClient.from('clients').select('*').eq('role', 'broker').limit(1).maybeSingle();
+        if (broker) currentUserAssignedAgentId = broker.id;
+      }
+
+      if (!currentUserAssignedAgentId) {
+        container.innerHTML = `<p class="text-slate-400 text-xs py-8">No assigned realtor found. Please contact brokerage admin.</p>`;
+        return;
+      }
+
+      const { data: agent, error } = await supabaseClient
+        .from('clients')
+        .select('*')
+        .eq('id', currentUserAssignedAgentId)
+        .maybeSingle();
+
+      if (error || !agent) {
+        container.innerHTML = `<p class="text-slate-400 text-xs py-8">Unable to load realtor contact details.</p>`;
+        return;
+      }
+
+      const displayName = (agent.full_name && agent.full_name.trim()) ? agent.full_name : 'Primary Brokerage Agent';
+      const roleTitle = agent.role === 'broker' ? 'Managing Broker' : 'Licensed Real Estate Agent';
+
+      container.innerHTML = `
+        <div class="relative w-28 h-28 mx-auto rounded-full bg-blue-900 border-4 border-blue-100 flex items-center justify-center text-4xl text-white shadow-md overflow-hidden">
+          👤
+        </div>
+
+        <div>
+          <h4 class="text-lg font-bold text-blue-900">${displayName}</h4>
+          <span class="inline-block bg-blue-100 text-blue-800 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase mt-1">
+            ${roleTitle}
+          </span>
+        </div>
+
+        <div class="bg-white p-3 rounded-xl border border-slate-200 text-left space-y-2 text-xs text-slate-600">
+          <p class="flex items-center gap-2">
+            <span>📧</span> <span class="font-semibold text-slate-800">${agent.email || 'N/A'}</span>
+          </p>
+          <p class="flex items-center gap-2">
+            <span>📞</span> <span class="font-semibold text-slate-800">${agent.phone || '(555) 019-2831'}</span>
+          </p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 pt-2">
+          <a href="tel:${agent.phone || ''}" class="bg-blue-900 hover:bg-blue-800 text-white font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors">
+            <span>📞</span> Call Agent
+          </a>
+          <a href="mailto:${agent.email || ''}" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors">
+            <span>📧</span> Email Agent
+          </a>
+        </div>
+      `;
+    }
+
     // LOAD CLIENT SUBMITTED REFERRALS WITH STATUS & POINT VALUE
     async function loadClientReferrals() {
       const container = document.getElementById('client-referrals-container');
@@ -628,14 +759,13 @@
       container.innerHTML = referrals.map(ref => {
         const rawStatus = (ref.status || 'PENDING').toUpperCase();
         
-        // Point Value Logic (100 Points for Closed/Won)
         let pointValue = 0;
         let pointBadgeClass = 'bg-slate-100 text-slate-600';
         if (rawStatus === 'CLOSED_WON' || rawStatus === 'WON') {
           pointValue = 100;
           pointBadgeClass = 'bg-amber-100 text-amber-800 font-extrabold';
         } else if (rawStatus === 'PENDING_BROKER_APPROVAL') {
-          pointValue = 100; // Expected points
+          pointValue = 100;
           pointBadgeClass = 'bg-amber-50 text-amber-700 italic';
         }
 
