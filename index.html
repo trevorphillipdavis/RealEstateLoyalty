@@ -121,17 +121,12 @@
         </div>
 
         <!-- AGENT SUB-TAB FIXED HEIGHT CONTAINERS -->
-        <div class="min-h-[380px] max-h-[380px] overflow-y-auto pr-1">
+        <div class="min-h-[420px] max-h-[420px] overflow-y-auto pr-1">
           <div id="agent-subtab-leads" class="agent-subtab-content space-y-3"></div>
           <div id="agent-subtab-active" class="agent-subtab-content hidden space-y-3"></div>
           <div id="agent-subtab-won" class="agent-subtab-content hidden space-y-3"></div>
           <div id="agent-subtab-lost" class="agent-subtab-content hidden space-y-3"></div>
         </div>
-
-        <!-- SUBMIT A LEAD BUTTON FOR AGENTS -->
-        <button onclick="openAgentLeadModal()" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-2.5 rounded-xl text-sm shadow-md transition-all flex items-center justify-center gap-1.5">
-          <span>➕</span> Submit a Lead
-        </button>
       </section>
 
       <!-- TAB 4: BROKERAGE MANAGEMENT -->
@@ -172,7 +167,7 @@
     <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 space-y-4 border border-slate-200 relative animate-in fade-in zoom-in duration-150">
       <div class="flex justify-between items-center border-b border-slate-100 pb-3">
         <h3 class="font-bold text-blue-900 text-base flex items-center gap-2">
-          <span>🏠</span> Direct Lead Submission
+          <span>🏠</span> Submit New Lead
         </h3>
         <button onclick="closeAgentLeadModal()" class="text-slate-400 hover:text-slate-600 font-bold text-lg">&times;</button>
       </div>
@@ -200,7 +195,7 @@
         </div>
 
         <div>
-          <label class="block text-[11px] font-semibold text-slate-600 mb-1">Notes / Property Preference</label>
+          <label class="block text-[11px] font-semibold text-slate-600 mb-1">Notes / Details</label>
           <textarea id="agent-lead-notes" rows="3" class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500" placeholder="Looking for 3 bed, 2 bath in suburbs..."></textarea>
         </div>
 
@@ -216,8 +211,8 @@
     </div>
   </div>
 
-  <!-- BOTTOM NAVIGATION BAR -->
-  <nav id="bottom-nav" class="hidden w-full bg-white border-t border-slate-200 fixed bottom-0 left-0 right-0 py-2 px-4 shadow-lg">
+  <!-- BOTTOM NAVIGATION BAR WITH "SUBMIT A LEAD" INTEGRATED -->
+  <nav id="bottom-nav" class="hidden w-full bg-white border-t border-slate-200 fixed bottom-0 left-0 right-0 py-2 px-4 shadow-lg z-40">
     <div class="max-w-md mx-auto flex justify-around items-center" id="nav-tabs-container">
       <button id="nav-rewards-btn" onclick="switchTab('tab-rewards')" class="nav-btn text-blue-600 flex flex-col items-center">
         <span class="text-lg">💎</span>
@@ -230,6 +225,11 @@
       <button id="nav-agent-btn" onclick="switchTab('tab-agent')" class="nav-btn hidden text-slate-400 flex flex-col items-center">
         <span class="text-lg">🛡️</span>
         <span class="text-[10px] font-semibold">Agent Portal</span>
+      </button>
+      <!-- SUBMIT A LEAD NAV BUTTON FOR AGENTS/BROKERS -->
+      <button id="nav-submit-lead-btn" onclick="openAgentLeadModal()" class="nav-btn hidden text-emerald-600 flex flex-col items-center font-bold">
+        <span class="text-lg">➕</span>
+        <span class="text-[10px] font-semibold">Submit a Lead</span>
       </button>
       <button id="nav-broker-btn" onclick="switchTab('tab-broker')" class="nav-btn hidden text-slate-400 flex flex-col items-center">
         <span class="text-lg">👑</span>
@@ -294,21 +294,25 @@
 
       const rewardsNav = document.getElementById('nav-rewards-btn');
       const agentNav = document.getElementById('nav-agent-btn');
+      const submitLeadNav = document.getElementById('nav-submit-lead-btn');
       const brokerNav = document.getElementById('nav-broker-btn');
 
       if (currentUserRole === 'agent') {
         rewardsNav.classList.add('hidden');
         agentNav.classList.remove('hidden');
+        submitLeadNav.classList.remove('hidden'); // Show Submit a Lead in nav for agents
         brokerNav.classList.add('hidden');
         switchTab('tab-agent');
       } else if (currentUserRole === 'broker') {
         rewardsNav.classList.remove('hidden');
         agentNav.classList.remove('hidden');
+        submitLeadNav.classList.remove('hidden'); // Show Submit a Lead in nav for brokers
         brokerNav.classList.remove('hidden');
         switchTab('tab-rewards');
       } else {
         rewardsNav.classList.remove('hidden');
         agentNav.classList.add('hidden');
+        submitLeadNav.classList.add('hidden');
         brokerNav.classList.add('hidden');
         switchTab('tab-rewards');
       }
@@ -411,7 +415,7 @@
         ref_email: email,
         ref_phone: phone,
         notes: notes,
-        status: 'ACCEPTED' // Directly set to active for agents submitting their own leads
+        status: 'ACCEPTED'
       }]);
 
       if (error) {
@@ -419,8 +423,13 @@
       } else {
         alert("Lead created successfully!");
         closeAgentLeadModal();
-        await loadAgentPortalData();
-        switchAgentSubTab('active');
+        if (!document.getElementById('tab-agent').classList.contains('hidden')) {
+          await loadAgentPortalData();
+          switchAgentSubTab('active');
+        } else {
+          switchTab('tab-agent');
+          switchAgentSubTab('active');
+        }
       }
     }
 
